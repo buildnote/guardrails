@@ -1,0 +1,3 @@
+<coverage line-rate="1.0"><packages><package name="app"><classes>
+         <class name="Outer" filename="app/outer.py"><lines><line number="1" hits="1"/></lines></class>
+       </classes></package></packages></coverage>

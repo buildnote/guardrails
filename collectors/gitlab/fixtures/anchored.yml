@@ -1,0 +1,5 @@
+default: &shared
+  image: alpine:3.19
+build:
+  script:
+    - make

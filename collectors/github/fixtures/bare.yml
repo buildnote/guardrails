@@ -1,0 +1,7 @@
+name: Bare
+on: push
+jobs:
+  bare:
+    runs-on: ubuntu-latest
+    steps:
+      - run: make

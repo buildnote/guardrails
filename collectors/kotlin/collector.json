@@ -1,0 +1,31 @@
+{
+  "id": "kotlin",
+  "version": "v1",
+  "name": "Kotlin build",
+  "description": "The Kotlin version the Gradle or Maven build declares and the file that declares it, for the project and for every Gradle project it includes.",
+  "icon": "icon.svg",
+  "run": "kotlin.py",
+  "timeoutSeconds": 30,
+  "collect": [
+    "gradle",
+    "maven"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether the Gradle or Maven build reports that the directory exists. When it doesn't, nothing else is collected, and when neither build collected anything, this collector collects nothing at all.",
+    "sources": "The Gradle and Maven build files that were present to read, Gradle first.",
+    "declared": "Where the Kotlin version is declared, or `null` when nothing declares one. The project's own Gradle manifest wins over the manifest of the Gradle build's `root`, which wins over the version catalog, and Gradle wins over Maven.",
+    "declared.version": "The version declared.",
+    "declared.source": "The file declaring it, from the directory the CLI runs in, so a version a module inherits from its build root shows the root's file.",
+    "projects": "The root project followed by every project the Gradle settings file includes.",
+    "projects[].path": "Gradle path of the project, `:` for the root.",
+    "projects[].directory": "Directory holding it, from the directory the CLI runs in.",
+    "projects[].declared": "Where that project declares its own Kotlin version, shaped as above, or `null`."
+  }
+}

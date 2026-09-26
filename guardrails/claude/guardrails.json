@@ -1,0 +1,67 @@
+{
+  "version": "v1",
+  "category": "claude",
+  "icon": "icon.svg",
+  "guardrails": {
+    "cli-safe-flags": {
+      "name": "Claude runs in CI without bypassing its permissions",
+      "description": "No Claude CLI invocation the build ran asked to skip its approval step.",
+      "severity": "error",
+      "collect": [
+        "commands"
+      ],
+      "remediation": "Remove `--dangerously-skip-permissions` from the invocation, and list the tools the job actually needs instead:\n\n```bash\nclaude -p --output-format json --allowedTools \"Read\" \"Grep\" \"Bash(git diff:*)\" 'review this diff'\n```\n\nThe flag is meant for a sandbox you don't mind losing. In CI, it hands that freedom to a model reading a pull request someone outside the repository wrote, while it holds the runner's checkout, its environment and any credentials the job was given. A prompt hidden in a diff then becomes a command on the runner. `--allowedTools` gives the run what it needs and nothing more.",
+      "check": {
+        "run": "cli-safe-flags.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "dangerousFlags": {
+          "default": "--dangerously-skip-permissions,--allow-dangerously-skip-permissions",
+          "description": "Comma separated flags that remove the approval step. Any one of them is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "cli-structured-output": {
+      "name": "Claude answers CI in a format a program can read",
+      "description": "Every headless Claude CLI invocation the build ran asked for structured output.",
+      "severity": "warning",
+      "collect": [
+        "commands"
+      ],
+      "remediation": "Add `--output-format json` to the invocation:\n\n```bash\nclaude -p --output-format json 'summarise what changed' > review.json\n```\n\nA headless run is read by a program, not a person, and reading prose means guessing: a step that greps the answer for `FAIL` passes the day the model words it differently. JSON returns the result, the cost and the session id as fields, so your job can branch on a value instead of on a phrasing.",
+      "check": {
+        "run": "cli-structured-output.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "formats": {
+          "default": "json,stream-json",
+          "description": "Comma separated `--output-format` values that count as structured."
+        }
+      },
+      "maxViolations": 0
+    },
+    "instructions-symlinked": {
+      "name": "Claude reads the instruction file the repository keeps",
+      "description": "`CLAUDE.md` is a symbolic link to `AGENTS.md`, not a second copy of it or missing altogether.",
+      "severity": "warning",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Point the alias at the file the repository actually keeps:\n\n```bash\nln -sf AGENTS.md CLAUDE.md\ngit add CLAUDE.md\n```\n\nClaude Code reads `CLAUDE.md`, while every other agent follows the [agents.md](https://agents.md) convention and reads `AGENTS.md`. With only one of the two files, only some of the agents working in the repository get instructions. With two separate files, the instructions drift apart within a month.\n\nMake sure the link is committed as a link. On a Windows checkout, `git config core.symlinks` must be `true`; otherwise git writes a text file containing the target's name, and that is what both agents read.",
+      "check": {
+        "run": "instructions-symlinked.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "paths": {
+          "default": "CLAUDE.md,AGENTS.md",
+          "description": "The alias first, then the file it must be a symbolic link to. Both are relative to the directory the CLI runs in."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

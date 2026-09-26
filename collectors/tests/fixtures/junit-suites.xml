@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="pytest" tests="4" failures="1" errors="1" skipped="1" time="0.412">
+  <testsuite name="tests.test_calculator" tests="4" failures="1" errors="1" skipped="1" time="0.412" timestamp="2026-08-20T10:14:02">
+    <testcase classname="tests.test_calculator.CalculatorTests" name="test_adds_two_numbers" file="tests/test_calculator.py" line="12" time="0.005"/>
+    <testcase classname="tests.test_calculator.CalculatorTests" name="test_divides_by_zero" file="tests/test_calculator.py" line="19" time="0.007">
+      <failure message="assert 0 == 1" type="AssertionError">tests/test_calculator.py:21: AssertionError</failure>
+    </testcase>
+    <testcase classname="tests.test_calculator.CalculatorTests" name="test_reads_configuration" file="tests/test_calculator.py" line="27" time="0.100">
+      <error message="fixture 'settings' not found" type="ValueError">tests/test_calculator.py:29: ValueError</error>
+    </testcase>
+    <testcase classname="tests.test_calculator.CalculatorTests" name="test_uses_gpu" file="tests/test_calculator.py" line="34" time="0.300">
+      <skipped message="no GPU on this runner" type="pytest.skip"/>
+    </testcase>
+    <system-out>collected 4 items</system-out>
+  </testsuite>
+</testsuites>

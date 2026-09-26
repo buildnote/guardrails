@@ -1,0 +1,13 @@
+SPDXVersion: SPDX-2.2
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: widget
+
+PackageName: widget
+PackageVersion: 1.4.0
+PackageLicenseDeclared: MIT
+ExternalRef: PACKAGE-MANAGER purl pkg:maven/io.buildnote/widget@1.4.0
+
+PackageName: slf4j-api
+PackageVersion: 2.0.13
+PackageLicenseConcluded: NOASSERTION

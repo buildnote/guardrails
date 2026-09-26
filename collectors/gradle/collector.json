@@ -1,0 +1,47 @@
+{
+  "id": "gradle",
+  "version": "v1",
+  "name": "Gradle build",
+  "description": "The Gradle build in the project directory: its settings and manifest, every included project, the wrapper and the distribution it pins, the version catalog, and every dependency the build files declare or the lock files resolve, with the versions its platforms supply.",
+  "icon": "icon.svg",
+  "run": "gradle.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected, and when the directory holds no Gradle build (no settings file, no manifest and no version catalog), the collector collects nothing at all.",
+    "root": "Directory holding the settings file of the build this project belongs to, from the directory the CLI runs in, or `null` when `directory` is that root or nothing above it is. It is only looked for when `directory` holds no settings file of its own, and never above the directory the CLI runs in, so a module checked on its own reads the settings, version catalog, wrapper and platforms its root supplies rather than reporting none. A module of a repository checked from that repository's root therefore reads `.` here, and a project that is its own build root reads `null`. Nothing else from the root is collected: `projects` and `dependencies` remain those of `directory`.",
+    "settings": "Settings file found (`settings.gradle.kts` or `settings.gradle`), from the directory the CLI runs in, taken from `root` when the project carries none of its own, or `null`.",
+    "manifest": "Root manifest found (`build.gradle.kts` or `build.gradle`), from the directory the CLI runs in, or `null`.",
+    "sources": "The build files that were there to read, from the directory the CLI runs in, in the order they are read, followed by the ones read from `root`.",
+    "versionCatalog": "Every entry under `[versions]` in `gradle/libs.versions.toml`, by name, taken from `root` when the project carries no catalog of its own. Empty when there is no catalog.",
+    "wrapper.script": "Whether `gradlew` is committed, in `projectDir` or in `root` when the project carries no wrapper of its own.",
+    "wrapper.properties": "Path of the wrapper properties file, from the directory the CLI runs in, or `null` when it is not committed.",
+    "wrapper.distributionUrl": "The distribution the wrapper pins, or `null` when it declares none.",
+    "wrapper.distributionSha256Sum": "Checksum the wrapper properties pin the distribution to, or `null` when they pin none, in which case the wrapper trusts whatever the distribution URL serves.",
+    "wrapper.version": "Gradle version named by that URL, or `null` when it names none.",
+    "projects": "The root project followed by every project the settings file includes.",
+    "projects[].path": "Gradle path of the project, `:` for the root.",
+    "projects[].directory": "Directory holding it, from the directory the CLI runs in.",
+    "projects[].manifest": "Manifest found in that directory, from the directory the CLI runs in, or `null`.",
+    "dependencies": "Every dependency the root project and every included project takes on, split by whether the build declares it. A commented out line is not one, and neither is a `project(\":x\")` dependency, a `constraints` entry or a catalog alias the catalog does not declare.",
+    "dependencies.direct": "Every dependency a build file declares, in the order the files declare them.",
+    "dependencies.direct[].path": "`group:name` of the dependency.",
+    "dependencies.direct[].version": "Version, taken from the lock file when one resolves it and from a declared platform when the declaration states none. `null` when nothing in the files resolves one, such as an interpolated variable or a catalog alias declaring no version.",
+    "dependencies.direct[].scopes": "Every configuration it is declared in, followed by every configuration a lock file resolves it for. The two are different vocabularies: `implementation` is declarable, `runtimeClasspath` is resolvable, and a dependency declared and locked carries both.",
+    "dependencies.direct[].source": "Build file declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].platform": "Present and `true` only when it is declared as `platform(...)` or `enforcedPlatform(...)`, meaning it is a BOM supplying versions rather than code.",
+    "dependencies.direct[].managedBy": "Present only when the `version` came from a platform, and then the `group:name:version` of that platform. The BOM is not in the repository, so it is never read: a platform is matched to a dependency by **group**, most specific first, and the version taken is the platform's own. Treat a version carrying a `managedBy` as a hint rather than a fact. It is wrong wherever the BOM does not publish one version line for the whole group, and it is set even on a coordinate the BOM never lists but whose group happens to sit under the platform's. A platform declared in the root manifest supplies versions to every included project; one declared anywhere else supplies only the project declaring it; and one declared in the manifest of `root` supplies `projectDir` and every project it includes.",
+    "dependencies.transitive": "Every dependency a lock file resolves that the project's own build file does not declare, meaning another dependency pulled it in. Empty when the build locks nothing; check `lockfiles` to tell that apart from a build that pulls nothing in.",
+    "dependencies.transitive[].path": "`group:name` of the dependency.",
+    "dependencies.transitive[].version": "Version the lock file resolves.",
+    "dependencies.transitive[].scopes": "Every configuration the lock file resolves it for.",
+    "dependencies.transitive[].source": "Lock file resolving it, from the directory the CLI runs in.",
+    "lockfiles": "Every dependency lock file that was read, from the directory the CLI runs in."
+  }
+}

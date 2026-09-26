@@ -1,0 +1,34 @@
+{
+  "id": "java",
+  "version": "v1",
+  "name": "Java build",
+  "description": "The Java version the Gradle or Maven build declares, how it declares it, and whether that mechanism makes the build reproducible, for the project and for every Gradle project it includes.",
+  "icon": "icon.svg",
+  "run": "java.py",
+  "timeoutSeconds": 30,
+  "collect": [
+    "gradle",
+    "maven"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether the Gradle or Maven build reports that the directory exists. When it doesn't, nothing else is collected, and when neither build collected anything, this collector collects nothing at all.",
+    "sources": "The Gradle and Maven build files that were present to read, Gradle first.",
+    "declared": "Where the Java version is declared, or `null` when nothing declares one and whatever JDK runs the build decides. A Gradle toolchain wins over source compatibility, and Gradle wins over Maven.",
+    "declared.version": "The version declared, as a release number such as `21`. `JavaVersion.VERSION_21`, `1.8` and `21` are all read as the release they name.",
+    "declared.source": "The file declaring it, from the directory the CLI runs in.",
+    "declared.mechanism": "How it is declared: `toolchain` when a Java toolchain selects the JDK, `compatibility` for `sourceCompatibility` or `targetCompatibility`, `release` for the compiler's `--release`, or `property` for a Maven property.",
+    "declared.reproducible": "Whether the mechanism makes the build reproducible. Only a toolchain does: it provisions the JDK it names. Source compatibility only asks whichever JDK is on the runner to accept older syntax, and the build still links against that JDK's own classes.",
+    "toolchain": "Whether any build file declares a Java toolchain at all. This tells you whether the build, not the runner, chooses the JDK it compiles against.",
+    "projects": "The root project followed by every project the Gradle settings file includes.",
+    "projects[].path": "Gradle path of the project, `:` for the root.",
+    "projects[].directory": "Directory holding it, from the directory the CLI runs in.",
+    "projects[].declared": "Where that project declares its own Java version, shaped as above, or `null`."
+  }
+}

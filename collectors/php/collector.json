@@ -1,0 +1,46 @@
+{
+  "id": "php",
+  "version": "v1",
+  "name": "PHP project",
+  "description": "The Composer project in the project directory: the package it declares, the PHP version and extensions it asks for, the packages it requires and which of them are pinned, and whether the lock file is committed.",
+  "icon": "icon.svg",
+  "run": "php.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in, always `composer.json`.",
+    "sources": "Every manifest that was read and understood. A manifest the reader could not handle is in `unparsed` instead.",
+    "declared": "The PHP version the project asks for, or `null` when it asks for none. `config.platform.php` wins over `require.php`, because it is the version Composer resolves against.",
+    "declared.version": "Constraint exactly as written, such as `^8.2` or `8.2.18`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a range. A `^`, a `~`, a `>=`, a `*` or a `|` is not pinned.",
+    "type": "The `type` the manifest declares, such as `library` or `project`, or `null` when it declares none and `library` is implied.",
+    "projects": "The one package the manifest declares. Composer has no workspaces, so this is always a single entry.",
+    "projects[].path": "Directory of the package, from the directory the CLI runs in, always `directory` itself.",
+    "projects[].manifest": "That package's `composer.json`, from the directory the CLI runs in.",
+    "projects[].name": "Name the manifest declares, such as `company/widget`, or `null` when it declares none.",
+    "dependencies": "What the manifest requires, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every package that `require` and `require-dev` name. The `php` constraint and the `ext-` and `lib-` platform requirements are left out, because they are not packages.",
+    "dependencies.direct[].name": "Package name, such as `symfony/console`.",
+    "dependencies.direct[].version": "Constraint exactly as written, such as `^7.0`.",
+    "dependencies.direct[].scopes": "Which of `require` and `require-dev` declare it.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the constraint names one exact version. A `^`, a `~`, a range, a `*`, a `dev-` branch or a `@` stability flag is not pinned.",
+    "dependencies.transitive": "Always empty. What `composer.lock` resolves is not read: `lockfiles` says whether one is committed.",
+    "platform": "Every `ext-` and `lib-` requirement the manifest names, which is what the runtime has to carry rather than what Composer installs.",
+    "platform[].name": "Requirement name, such as `ext-json`.",
+    "platform[].version": "Constraint exactly as written, such as `*`.",
+    "scripts": "Names of the scripts the manifest declares. Names only, because a script body can carry a token.",
+    "lockfiles": "`composer.lock` when it is committed, from the directory the CLI runs in. An application without one resolves differently on every install.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

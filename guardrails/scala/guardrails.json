@@ -1,0 +1,66 @@
+{
+  "version": "v1",
+  "category": "scala",
+  "icon": "icon.svg",
+  "collect": [
+    "scala"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Scala version is declared",
+      "description": "The build declares the Scala version it compiles against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the compiler version once in `build.sbt`, so every subproject inherits it:\n\n```scala\nThisBuild / scalaVersion := \"3.4.1\"\n```\n\nWithout it, sbt compiles against the Scala version its own launcher was built with. The compiler that produced the artifact then depends on the machine that ran the build, not on the checkout, and it changes whenever the launcher does.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "2.13",
+          "description": "Oldest Scala version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "sbt-version-pinned": {
+      "name": "sbt version is pinned",
+      "description": "`project/build.properties` pins the sbt version the build runs with, instead of leaving it to whichever launcher the machine has.",
+      "severity": "warning",
+      "remediation": "Pin the sbt version in `project/build.properties`:\n\n```\nsbt.version=1.9.9\n```\n\nThis one-line file makes `sbt` mean the same thing on every machine. Without it, whichever sbt launcher the runner has decides how the build runs, so dependency resolution, the plugins that load and the compiler options it accepts can all differ between a laptop and CI on the same commit.",
+      "check": {
+        "run": "sbt-version-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "dependencies-pinned": {
+      "name": "Scala dependencies are pinned",
+      "description": "Every library dependency found in the build names a literal revision. `build.sbt` is Scala code read by pattern, so a dependency built by a function, added inside a condition or held in a variable isn't detected, and the list may be incomplete.",
+      "severity": "warning",
+      "remediation": "Write the revision as a literal in the entry that declares the dependency:\n\n```scala\nlibraryDependencies += \"org.typelevel\" %% \"cats-effect\" % \"3.5.4\"\n```\n\nsbt expects a literal revision, not a range. An entry that isn't one is either a moving revision such as `latest.integration`, which resolves to whatever the repository serves that day, or a reference this guardrail can't follow. `build.sbt` is read by pattern here, not evaluated as a build, so a revision held in a `val` or produced by a function also shows as unresolved. Writing the revision in the entry itself puts the version in the diff that changes it.",
+      "check": {
+        "run": "dependencies-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-snapshot-dependencies": {
+      "name": "No snapshot dependencies",
+      "description": "No library dependency found in the build is a `-SNAPSHOT`. `build.sbt` is Scala code read by pattern, so dependencies it declares indirectly aren't detected, and the list may be incomplete.",
+      "severity": "error",
+      "remediation": "Depend on a released revision. If the library doesn't have one yet, cut a release upstream:\n\n```scala\nlibraryDependencies += \"com.company\" %% \"queue\" % \"1.4.0\"\n```\n\nA snapshot is republished under the same coordinates, so whatever `1.4.0-SNAPSHOT` resolved to on the day the build shipped is gone, and you can't rebuild this commit into the artifact that was released from it. A snapshot from `publishLocal` is worse: it never existed anywhere a rebuild could reach, so the build passes for the author and nobody else.",
+      "check": {
+        "run": "no-snapshot-dependencies.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

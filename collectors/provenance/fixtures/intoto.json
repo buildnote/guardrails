@@ -1,0 +1,40 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [
+    {
+      "name": "buildnote-cli-1.42.0.jar",
+      "digest": { "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08" }
+    },
+    {
+      "name": "buildnote-cli-1.42.0.jar.asc",
+      "digest": { "sha256": "0263829989b6fd954f72baaf2fc64bc2e2f01d692d4de72986ea808f6e99813f" }
+    }
+  ],
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "externalParameters": {
+        "workflow": {
+          "ref": "refs/heads/main",
+          "repository": "https://github.com/buildnote/buildnote",
+          "path": ".github/workflows/release.yml"
+        }
+      },
+      "internalParameters": { "github": { "event_name": "push", "repository_id": "704912233" } },
+      "resolvedDependencies": [
+        {
+          "uri": "git+https://github.com/buildnote/buildnote@refs/heads/main",
+          "digest": { "gitCommit": "c1124e7a5b0f7d2a4e6c9018d3fe4471a2b5c6d7" }
+        }
+      ]
+    },
+    "runDetails": {
+      "builder": { "id": "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.0.0" },
+      "metadata": {
+        "invocationId": "https://github.com/buildnote/buildnote/actions/runs/10442331987/attempts/1",
+        "startedOn": "2026-08-20T09:40:12Z"
+      }
+    }
+  }
+}

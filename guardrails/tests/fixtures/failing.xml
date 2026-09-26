@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.company.widget.QueueTest" tests="1" failures="1" errors="0" skipped="0" time="0.113">
+  <testcase name="rejects a negative limit" classname="com.company.widget.QueueTest" time="0.113">
+    <failure message="expected IllegalArgumentException" type="AssertionFailedError">at QueueTest.kt:41</failure>
+  </testcase>
+</testsuite>

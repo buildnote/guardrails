@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.company.widget.QueueTest" tests="4" failures="1" errors="0" skipped="1" time="0.624">
+  <testcase name="bounds the queue at its limit" classname="com.company.widget.QueueTest" time="0.201"
+            file="service/src/test/kotlin/QueueTest.kt"/>
+  <testcase name="drains in the order it filled" classname="com.company.widget.QueueTest" time="0.187"
+            file="service/src/test/kotlin/QueueTest.kt"/>
+  <testcase name="rejects a negative limit" classname="com.company.widget.QueueTest" time="0.148"
+            file="service/src/test/kotlin/QueueTest.kt">
+    <failure message="expected IllegalArgumentException, nothing was thrown" type="org.opentest4j.AssertionFailedError">
+      at com.company.widget.QueueTest.rejects a negative limit(QueueTest.kt:41)
+    </failure>
+  </testcase>
+  <testcase name="drops the oldest under load" classname="com.company.widget.QueueTest" time="0.088"
+            file="service/src/test/kotlin/QueueTest.kt">
+    <skipped message="flaky on a shared runner"/>
+  </testcase>
+</testsuite>

@@ -1,0 +1,72 @@
+{
+  "version": "v1",
+  "category": "rust",
+  "icon": "icon.svg",
+  "collect": [
+    "rust"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Rust version is declared",
+      "description": "The build names the Rust toolchain it compiles with. The toolchain is an exact release, not a moving channel, and it is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Name the toolchain where `cargo` reads it, in a `rust-toolchain.toml` next to the manifest:\n\n```toml\n[toolchain]\nchannel = \"1.76.0\"\ncomponents = [\"clippy\", \"rustfmt\"]\n```\n\nA published crate can also add `rust-version = \"1.76\"` under `[package]`. That sets the minimum version the crate compiles with, not the toolchain it is built with. With neither, the compiler is whichever release the runner already has. `stable` doesn't count, because it moves: a stricter lint or a newly stabilised feature can change the result when you rerun the same commit.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "1.70",
+          "description": "Oldest Rust version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lockfile-committed": {
+      "name": "Cargo dependencies are locked",
+      "description": "The build commits `Cargo.lock`, so a rebuild of the same commit resolves the same crate versions.",
+      "severity": "warning",
+      "remediation": "Commit the lock file Cargo writes next to the manifest:\n\n```bash\ncargo generate-lockfile\ngit add Cargo.lock\n```\n\nA bare `1.0.197` is a caret requirement that matches every compatible release. Without a lock file, a rebuild resolves whatever the registry serves that day, and the binary that shipped is not the one that was reviewed. The lock file only pins this build: Cargo ignores a library's own `Cargo.lock` when another crate depends on it, so committing one keeps CI stable but doesn't affect anything downstream.",
+      "check": {
+        "run": "lockfile-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "edition-floor": {
+      "name": "Rust edition is current enough",
+      "description": "The package declares a Rust edition instead of falling back to the implied 2015 edition, and that edition is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the edition in `Cargo.toml` and migrate to it:\n\n```toml\n[package]\nname = \"widget\"\nedition = \"2021\"\n```\n\n```bash\ncargo fix --edition\n```\n\nWhen the key is missing, Cargo assumes the 2015 edition, so the crate compiles under the module path resolution, closure capture and bare trait object rules that later editions changed. The compiler's suggestions then stop matching the code in front of you, and your dependencies are built under different rules from your own crate.",
+      "check": {
+        "run": "edition-floor.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minEdition": {
+          "default": "2021",
+          "description": "Oldest Rust edition accepted, given as its year. A declared edition below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-git-dependencies": {
+      "name": "No dependency is fetched from a git URL",
+      "description": "No manifest declares a dependency with a `git` source, so every crate in the build comes from a registry that versions it.",
+      "severity": "warning",
+      "remediation": "Depend on a published release instead of a repository:\n\n```toml\n[dependencies]\ntracing = \"0.1.40\"\n```\n\nIf you really need a fork, publish it to a registry you control, or vendor it into the checkout and depend on it by `path`. A `git` dependency resolves from a URL that nobody versions or audits: the branch can be force pushed, the host can disappear, and no advisory database or bill of materials can tell you what the build actually pulled in.",
+      "check": {
+        "run": "no-git-dependencies.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

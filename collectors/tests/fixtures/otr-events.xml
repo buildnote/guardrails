@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<e:events xmlns="https://schemas.opentest4j.org/reporting/core/0.2.0"
+          xmlns:e="https://schemas.opentest4j.org/reporting/events/0.2.0"
+          xmlns:java="https://schemas.opentest4j.org/reporting/java/0.2.0"
+          xmlns:junit="https://schemas.junit.org/open-test-reporting">
+    <infrastructure>
+        <hostName>ci-runner-3</hostName>
+        <userName>ci</userName>
+        <operatingSystem>Linux</operatingSystem>
+        <java:javaVersion>21.0.2</java:javaVersion>
+    </infrastructure>
+    <e:started id="1" name="JUnit Jupiter" time="2026-08-20T09:15:00.100000Z">
+        <metadata>
+            <junit:uniqueId>[engine:junit-jupiter]</junit:uniqueId>
+            <junit:type>CONTAINER</junit:type>
+        </metadata>
+    </e:started>
+    <e:started id="2" name="CalculatorTests" parentId="1" time="2026-08-20T09:15:00.250000Z">
+        <metadata>
+            <junit:uniqueId>[engine:junit-jupiter]/[class:com.example.CalculatorTests]</junit:uniqueId>
+            <junit:type>CONTAINER</junit:type>
+        </metadata>
+        <sources>
+            <java:classSource className="com.example.CalculatorTests"/>
+        </sources>
+    </e:started>
+    <e:started id="3" name="addsTwoNumbers()" parentId="2" time="2026-08-20T09:15:00.400000Z">
+        <metadata>
+            <junit:type>TEST</junit:type>
+        </metadata>
+        <sources>
+            <java:methodSource className="com.example.CalculatorTests" methodName="addsTwoNumbers"/>
+        </sources>
+    </e:started>
+    <e:finished id="3" time="2026-08-20T09:15:00.475000Z">
+        <result status="SUCCESSFUL"/>
+    </e:finished>
+    <e:started id="4" name="dividesByZero()" parentId="2" time="2026-08-20T09:15:00.480000Z">
+        <metadata>
+            <junit:type>TEST</junit:type>
+        </metadata>
+        <sources>
+            <java:methodSource className="com.example.CalculatorTests" methodName="dividesByZero"/>
+        </sources>
+    </e:started>
+    <e:reported id="4" time="2026-08-20T09:15:00.510000Z">
+        <attachments>
+            <output source="stdout" time="2026-08-20T09:15:00.510000Z">dividing 10 by 0</output>
+        </attachments>
+    </e:reported>
+    <e:finished id="4" time="2026-08-20T09:15:00.530000Z">
+        <result status="FAILED">
+            <java:throwable type="java.lang.ArithmeticException" assertionError="false">java.lang.ArithmeticException: / by zero</java:throwable>
+        </result>
+    </e:finished>
+    <e:started id="5" name="readsConfiguration()" parentId="2" time="2026-08-20T09:15:00.540000Z">
+        <metadata>
+            <junit:type>TEST</junit:type>
+        </metadata>
+        <sources>
+            <java:methodSource className="com.example.CalculatorTests" methodName="readsConfiguration"/>
+        </sources>
+    </e:started>
+    <e:finished id="5" time="2026-08-20T09:15:00.570000Z">
+        <result status="ERRORED">
+            <java:throwable type="java.io.IOException">java.io.IOException: settings.yaml not found</java:throwable>
+        </result>
+    </e:finished>
+    <e:started id="6" name="usesGpu()" parentId="2" time="2026-08-20T09:15:00.580000Z">
+        <metadata>
+            <junit:type>TEST</junit:type>
+        </metadata>
+        <sources>
+            <java:methodSource className="com.example.CalculatorTests" methodName="usesGpu"/>
+        </sources>
+    </e:started>
+    <e:finished id="6" time="2026-08-20T09:15:00.600000Z">
+        <result status="SKIPPED">
+            <reason>no GPU on this runner</reason>
+        </result>
+    </e:finished>
+    <e:finished id="2" time="2026-08-20T09:15:00.610000Z">
+        <result status="FAILED"/>
+    </e:finished>
+    <e:finished id="1" time="2026-08-20T09:15:00.620000Z">
+        <result status="FAILED"/>
+    </e:finished>
+</e:events>

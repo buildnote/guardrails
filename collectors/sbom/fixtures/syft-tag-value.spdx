@@ -1,0 +1,38 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: buildnote-enterprise
+DocumentNamespace: https://anchore.com/syft/dir/buildnote-enterprise-4d1c9a02
+Creator: Tool: syft-1.14.2
+Created: 2026-08-20T09:47:18Z
+
+##### Package: glibc
+
+PackageName: glibc
+SPDXID: SPDXRef-Package-deb-glibc-77b1d0
+PackageVersion: 2.36-9+deb12u4
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseConcluded: LGPL-2.1-only
+PackageLicenseDeclared: LGPL-2.1-only
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: LIBRARY
+ExternalRef: PACKAGE-MANAGER purl pkg:deb/debian/glibc@2.36-9+deb12u4?arch=amd64
+
+##### Package: openssl
+
+PackageName: openssl
+SPDXID: SPDXRef-Package-deb-openssl-1a0f3e
+PackageVersion: 3.0.13-1
+PackageDownloadLocation: NOASSERTION
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: Apache-2.0
+ExternalRef: PACKAGE-MANAGER purl pkg:deb/debian/openssl@3.0.13-1
+
+##### Package: buildnote-agent
+
+PackageName: buildnote-agent
+SPDXID: SPDXRef-Package-buildnote-agent
+PackageDownloadLocation: NONE
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION

@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/*"]
+
+[workspace.dependencies]
+serde = "1.0.197"
+tracing = { git = "https://github.com/tokio-rs/tracing", tag = "v0.1.40" }

@@ -1,0 +1,4 @@
+{"results": {"tool": {"name": "cypress"}, "tests": [
+            {"name": "pending one", "status": "pending", "duration": 0},
+            {"name": "other one", "status": "other", "duration": 0}
+        ]}}

@@ -1,0 +1,49 @@
+name: azure-build
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  - main
+
+schedules:
+  - cron: "0 3 * * *"
+    branches:
+      include:
+        - main
+
+variables:
+  - name: gradleOptions
+    value: -Dorg.gradle.daemon=false
+  - group: deploy-credentials
+
+stages:
+  - stage: build
+    jobs:
+      - job: compile
+        displayName: Compile
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 30
+        steps:
+          - task: JavaToolInstaller@0
+            displayName: Set up the JDK
+            inputs:
+              versionSpec: '21'
+              jdkArchitectureOption: x64
+          - bash: ./gradlew check
+            displayName: Build
+          - template: steps/report.yml
+
+  - stage: deploy
+    jobs:
+      - deployment: release
+        pool: on-prem-fleet
+        environment: production
+        dependsOn:
+          - compile
+        condition: succeeded()
+        steps:
+          - pwsh: ./deploy.ps1 -Region $(region)

@@ -1,0 +1,46 @@
+{
+  "id": "elixir",
+  "version": "v1",
+  "name": "Elixir build",
+  "description": "The Mix build in the project directory: the application it declares, the Elixir version it asks for, every application of an umbrella, the dependencies each manifest names with their environments and origins, and the lock file beside them. `mix.exs` is Elixir rather than a declaration, so what it declares conditionally is not seen and `scanned` says so.",
+  "icon": "icon.svg",
+  "run": "elixir.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in, always `mix.exs`.",
+    "sources": "Every manifest that was read, in the order they were read.",
+    "scanned": "Every manifest that is Elixir rather than a declaration and was read by pattern. A dependency added inside a condition or built by a function is not seen, so `dependencies` read from one of these is a minimum, not the complete list.",
+    "declared": "The Elixir version the project asks for, or `null` when it asks for none.",
+    "declared.version": "Constraint exactly as written, such as `~> 1.16`.",
+    "declared.source": "Manifest declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a range. A `~>`, a `>=` or an `or` is not pinned.",
+    "app": "The application name the `project` function declares, such as `widget`, or `null` when the reader could not see one.",
+    "version": "The version the `project` function declares, such as `1.2.3`, or `null`.",
+    "umbrella": "Whether the project declares an `apps_path`, which makes it an umbrella whose real applications live under that directory.",
+    "projects": "The root application, followed by every application under the umbrella's `apps_path`.",
+    "projects[].path": "Directory of the application, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "That application's `mix.exs`, from the directory the CLI runs in.",
+    "projects[].name": "Application name it declares, or `null` when the reader could not see one.",
+    "dependencies": "What the manifests declare, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every dependency tuple the reader saw, in the order they appear.",
+    "dependencies.direct[].name": "Package name, such as `phoenix`.",
+    "dependencies.direct[].version": "Requirement exactly as written, such as `~> 1.7.0`, or `null` when the tuple names none because it comes from a path or a git URL.",
+    "dependencies.direct[].scopes": "Environments the `only` option names, such as `dev` and `test`, or `default` when the tuple names none and it is compiled in every environment.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the requirement names one exact version. A `~>`, a `>=`, a git URL or a path is not pinned.",
+    "dependencies.direct[].origin": "Where it comes from: `hex`, `git` when the tuple carries a `git:` or `github:` option, or `path` when it carries a `path:` option.",
+    "dependencies.transitive": "Always empty. What `mix.lock` resolves is not read: `lockfiles` says whether one is committed.",
+    "lockfiles": "`mix.lock` when it is committed, from the directory the CLI runs in. It carries the checksum of every package, so an application without one resolves and verifies differently on every build.",
+    "unparsed": "Every manifest the reader could not open, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

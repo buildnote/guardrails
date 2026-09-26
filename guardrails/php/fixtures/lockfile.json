@@ -1,0 +1,6 @@
+{
+  "content-hash": "9f1c0a2b3d4e5f60",
+  "packages": [
+    {"name": "symfony/console", "version": "v7.0.7"}
+  ]
+}

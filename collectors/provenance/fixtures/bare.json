@@ -1,0 +1,6 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicateType": "https://spdx.dev/Document",
+  "subject": [{"name": "widget-1.4.0.jar", "digest": {"sha256": "abc123"}}],
+  "predicate": {}
+}

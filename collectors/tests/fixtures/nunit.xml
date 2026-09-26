@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test-run id="2" duration="1.5">
+  <test-suite type="TestFixture" name="WidgetTests">
+    <test-case id="1" name="Adds" classname="Company.WidgetTests" result="Passed" duration="0.010"/>
+    <test-case id="2" name="Removes" classname="Company.WidgetTests" result="Failed" duration="0.020"/>
+  </test-suite>
+</test-run>

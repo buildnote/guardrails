@@ -1,0 +1,66 @@
+{
+  "version": "v1",
+  "category": "golang",
+  "icon": "icon.svg",
+  "collect": [
+    "golang"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Go version is declared",
+      "description": "The module declares the Go version it is built against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the Go version the module builds against in `go.mod`:\n\n```\ngo 1.22\n```\n\n`go mod edit -go=1.22` writes it for you. Without the directive, the language version is whatever the toolchain defaults to, so a build can accept syntax on one runner and reject it on another. A module far below the floor is compiled by a toolchain that is no longer supported.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "1.21",
+          "description": "Oldest Go version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "checksums-committed": {
+      "name": "Go module checksums are committed",
+      "description": "The module commits `go.sum`, so every module a build downloads is verified against the checksum recorded in the commit.",
+      "severity": "warning",
+      "remediation": "Commit the checksum file the Go tooling writes:\n\n```bash\ngo mod tidy\ngit add go.sum\n```\n\n`go.sum` holds the checksum of every module in the dependency graph. Without it, nothing verifies that what the build downloaded is what the module authors published, so a swapped or rewritten version reaches the binary unnoticed.",
+      "check": {
+        "run": "checksums-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-local-replacements": {
+      "name": "No module is replaced by a directory",
+      "description": "No `replace` directive points a module at a filesystem path, so the build only uses source that is in the checkout.",
+      "severity": "error",
+      "remediation": "Remove the directive and require the module by its own path, or replace it with a module path and version instead of a directory:\n\n```\nreplace github.com/company/queue => github.com/company/queue/v2 v2.1.0\n```\n\nFor local development across several modules, list the directories in the `use` block of a `go.work` file instead of adding another `replace`:\n\n```\ngo 1.22\n\nuse (\n\t./widget\n\t./queue\n)\n```\n\nA `replace` that points at a directory builds from something the checkout doesn't contain, so it compiles on the author's laptop and nowhere else.",
+      "check": {
+        "run": "no-local-replacements.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "toolchain-pinned": {
+      "name": "Go toolchain is pinned",
+      "description": "The module names the exact toolchain that compiles it, instead of leaving the `go` directive as a minimum version.",
+      "severity": "warning",
+      "remediation": "Name the toolchain next to the `go` directive:\n\n```\ngo 1.22\n\ntoolchain go1.22.3\n```\n\n`go mod edit -toolchain=go1.22.3` writes it for you. The `go` directive sets the lowest Go version the module builds with, not the one it is built by. Without a toolchain line, the compiler is whichever Go the runner happens to have, and a compiler change arrives without warning.",
+      "check": {
+        "run": "toolchain-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,6 @@
+[package]
+name = "widget-core"
+edition = "2018"
+
+[dependencies]
+serde = { workspace = true }

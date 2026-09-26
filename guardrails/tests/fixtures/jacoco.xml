@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<report name="widget">
+  <package name="com/company/widget">
+    <sourcefile name="Queue.kt">
+      <line nr="5" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="6" mi="0" ci="2" mb="1" cb="1"/>
+      <line nr="9" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="14" mi="2" ci="0" mb="2" cb="0"/>
+    </sourcefile>
+  </package>
+</report>

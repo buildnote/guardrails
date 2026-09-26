@@ -1,0 +1,8 @@
+
+                [versions]
+                junit = "5.11.0"
+
+                [libraries]
+                junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+                guava = "com.google.guava:guava:33.0.0-jre"
+            

@@ -1,0 +1,14 @@
+# Everything is owned by the platform group unless a section below says otherwise.
+* @company/platform
+
+[Backend][2] @company/backend
+/api/
+/service/
+
+[Documentation] @company/docs docs@company.example
+*.md
+/docs/
+
+^[Security review] @company/security/appsec
+/terraform/
+/service/deploy/

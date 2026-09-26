@@ -1,0 +1,5 @@
+# who owns what
+* @company/platform
+
+^[Security review][2] @company/security/appsec
+/terraform/

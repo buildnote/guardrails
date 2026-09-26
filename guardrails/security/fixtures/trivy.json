@@ -1,0 +1,3 @@
+{"SchemaVersion": 2, "Results": [{"Target": "go.sum", "Class": "lang-pkgs",
+  "Vulnerabilities": [{"VulnerabilityID": "CVE-2021-44228", "PkgName": "log4j-core",
+  "InstalledVersion": "2.14.1", "Severity": "CRITICAL", "Title": "remote code execution"}]}]}

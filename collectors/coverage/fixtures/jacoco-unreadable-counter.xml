@@ -1,0 +1,8 @@
+<report name="core">
+          <package name="io/buildnote/core">
+            <sourcefile name="Calculator.kt">
+              <line nr="7" mi="0" ci="abc" mb="0" cb="0"/>
+              <line nr="oops" mi="0" ci="4"/>
+            </sourcefile>
+          </package>
+        </report>

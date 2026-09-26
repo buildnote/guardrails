@@ -1,0 +1,84 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "organization": "GitHub",
+          "version": "2.19.3",
+          "semanticVersion": "2.19.3+202411051234",
+          "rules": [
+            {
+              "id": "java/sql-injection",
+              "name": "java/sql-injection",
+              "shortDescription": { "text": "Query built from user-controlled sources" },
+              "defaultConfiguration": { "level": "error" },
+              "properties": {
+                "tags": ["security", "external/cwe/cwe-089"],
+                "security-severity": "9.1",
+                "problem.severity": "error"
+              }
+            },
+            {
+              "id": "java/insecure-randomness",
+              "name": "java/insecure-randomness",
+              "shortDescription": { "text": "Use of a cryptographically weak PRNG" },
+              "defaultConfiguration": { "level": "warning" },
+              "properties": { "tags": ["security", "external/cwe/cwe-338"], "security-severity": "5.3" }
+            },
+            {
+              "id": "java/unused-container",
+              "name": "java/unused-container",
+              "shortDescription": { "text": "Useless assignment to local variable" },
+              "defaultConfiguration": { "level": "note" },
+              "properties": { "tags": ["maintainability"] }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "java/sql-injection",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": { "text": "This query depends on a user-provided value." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "src/main/java/io/company/UserDao.java" },
+                "region": { "startLine": 88, "startColumn": 19, "endColumn": 44 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleIndex": 1,
+          "level": "error",
+          "message": { "text": "Random value is used in a security context." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "file:///src/main/java/io/company/TokenFactory.java" },
+                "region": { "startLine": 21 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "java/unused-container",
+          "message": { "text": "Variable 'buffer' is assigned but never used." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "src/main/java/io/company/Buffers.java" },
+                "region": { "startLine": 12 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "version": "v1",
+  "category": "azure",
+  "icon": "icon.svg",
+  "collect": [
+    "azure"
+  ],
+  "inputs": {
+    "pipelines": {
+      "default": "azure-pipelines*.yml,azure-pipelines*.yaml",
+      "description": "Comma separated globs naming the Azure Pipelines definitions to read."
+    }
+  },
+  "guardrails": {
+    "job-timeout-set": {
+      "name": "Pipeline jobs declare a timeout",
+      "description": "Every job declares a timeout, and none of them asks for the maximum, so a hung job is stopped instead of holding an agent.",
+      "severity": "info",
+      "remediation": "Set a timeout on each job:\n\n```yaml\njobs:\n  - job: build\n    timeoutInMinutes: 15\n    steps:\n      - script: ./gradlew check\n```\n\nA job that doesn't declare one gets 60 minutes on a Microsoft-hosted agent and runs forever on a self-hosted one. `timeoutInMinutes: 0` asks for the maximum, which on a self-hosted agent means no limit at all, so the guardrail treats it the same as declaring nothing.",
+      "check": {
+        "run": "job-timeout-set.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxMinutes": {
+          "default": "60",
+          "description": "Longest timeout accepted. A job that declares more than this is treated as declaring none."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

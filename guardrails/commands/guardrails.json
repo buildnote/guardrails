@@ -1,0 +1,39 @@
+{
+  "version": "v1",
+  "category": "commands",
+  "icon": "icon.svg",
+  "collect": [
+    "commands"
+  ],
+  "guardrails": {
+    "forbidden-invocation": {
+      "name": "The build runs no command this repository forbids",
+      "description": "No command the build ran matched the executable and arguments this guardrail is configured to look for.",
+      "severity": "error",
+      "remediation": "Configure the executable and the arguments that make an invocation a violation. From the next run, the build is held to that rule:\n\n```json\n{\n  \"guardrails\": {\n    \"checks\": [\n      {\n        \"use\": \"commands/forbidden-invocation@v1\",\n        \"with\": {\n          \"command\": \"terraform,tofu\",\n          \"arguments\": \"apply,-auto-approve\",\n          \"match\": \"all\",\n          \"reason\": \"Terraform is applied from the deploy pipeline rather than from a build\"\n        }\n      }\n    ]\n  }\n}\n```\n\nEach entry is one rule. To add another rule, list the guardrail again with different inputs, and each entry reports its own verdict.\n\nIf the reported invocation is one the build is meant to make, change the rule, not the pipeline: narrow `arguments` to the form that is actually dangerous, or remove the entry. A rule nobody can satisfy gets turned off within a week.\n\nThe guardrail reads what the build actually ran, as recorded by `buildnote monitor`, not what a pipeline file says it would run. A command reached through a wrapper script or a package runner is reported the same way as one written directly into the job.\n\nThe recorded command line is the process's argument vector joined by spaces, so the original quoting is lost, and the command name is looked for in every token. As a result, an argument written inside a quoted string looks exactly like an argument of the command, and a line that mentions the command as a word of its own, such as `grep curl Dockerfile`, looks like an invocation of it. Both are reported instead of being guessed away. The evidence is the recorded line, so you can see which of the two happened.",
+      "check": {
+        "run": "forbidden-invocation.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "command": {
+          "default": "",
+          "description": "Comma separated executable names to look for. Any one of them counts. Each is matched against the file name of every token in the recorded line, so `/usr/local/bin/terraform` and `npx terraform` both count, and so does a line that only mentions it, such as `grep terraform Makefile`."
+        },
+        "arguments": {
+          "default": "",
+          "description": "Comma separated arguments that make an invocation a violation. Each is matched against the tokens of the command line exactly, in its `<argument>=<value>` form, and as a glob, so `-Dskip.tests=*` matches whatever value is set. If you name none, every invocation of the command is a violation."
+        },
+        "match": {
+          "default": "any",
+          "description": "`any` reports an invocation carrying any one of the arguments, and `all` reports one carrying all of them."
+        },
+        "reason": {
+          "default": "",
+          "description": "Why this repository forbids the invocation. It replaces the default wording as the violation's message."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

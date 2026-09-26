@@ -1,0 +1,45 @@
+{
+  "reportFormat": "CTRF",
+  "specVersion": "0.0.0",
+  "results": {
+    "tool": {
+      "name": "jest",
+      "version": "29.7.0"
+    },
+    "summary": {
+      "tests": 3,
+      "passed": 1,
+      "failed": 1,
+      "pending": 0,
+      "skipped": 1,
+      "other": 0,
+      "start": 1755680900,
+      "stop": 1755680903
+    },
+    "tests": [
+      {
+        "name": "renders the dashboard",
+        "status": "passed",
+        "duration": 1200,
+        "suite": "src/dashboard/Dashboard.test.tsx",
+        "filePath": "src/dashboard/Dashboard.test.tsx"
+      },
+      {
+        "name": "reports a failed widget",
+        "status": "failed",
+        "duration": 800,
+        "suite": "src/dashboard/Dashboard.test.tsx",
+        "filePath": "src/dashboard/Dashboard.test.tsx",
+        "message": "expect(received).toBe(expected)",
+        "trace": "at Object.<anonymous> (src/dashboard/Dashboard.test.tsx:41:22)"
+      },
+      {
+        "name": "exports the dashboard to PDF",
+        "status": "skipped",
+        "duration": 0,
+        "suite": "src/dashboard/Export.test.tsx",
+        "filePath": "src/dashboard/Export.test.tsx"
+      }
+    ]
+  }
+}

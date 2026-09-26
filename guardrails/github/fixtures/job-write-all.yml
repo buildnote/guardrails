@@ -1,0 +1,10 @@
+name: build
+on: push
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - run: ./gradlew build

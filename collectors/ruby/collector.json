@@ -1,0 +1,45 @@
+{
+  "id": "ruby",
+  "version": "v1",
+  "name": "Ruby project",
+  "description": "The Bundler project in the project directory: the Ruby version it asks for, the gem sources it resolves from, the gems each manifest declares with their groups and origins, and the lock file beside them. The Gemfile is Ruby rather than a declaration, so what it declares conditionally is not seen and `scanned` says so.",
+  "icon": "icon.svg",
+  "run": "ruby.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: the `Gemfile` when there is one, otherwise the gemspec.",
+    "sources": "Every manifest that was read, in the order they were read.",
+    "scanned": "Every manifest that is Ruby rather than a declaration and was read by pattern. A gem added inside a condition, a loop or an `eval` is not seen, so `dependencies` read from one of these is a minimum, not the complete list.",
+    "declared": "The Ruby version the project asks for, or `null` when it asks for none. `.ruby-version` wins over the `ruby` directive, because both a developer's shell and the runner's version manager read it. The `ruby` directive in turn wins over a gemspec's `required_ruby_version`, which is the lowest version the gem supports, not the version this checkout runs.",
+    "declared.version": "Constraint exactly as written, such as `3.3.1` or `>= 3.2`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a range. A `~>`, a `>=` or a `*` is not pinned.",
+    "bundler": "Version of Bundler `Gemfile.lock` records as the one that wrote it, or `null` when no lock file is committed.",
+    "sources_declared": "Every gem source the `Gemfile` names, such as `https://rubygems.org`. A second source is what a dependency confusion attack needs.",
+    "projects": "The one gem the checkout declares, or the project directory itself when it declares none. Bundler has no workspaces.",
+    "projects[].path": "Directory of the gem, from the directory the CLI runs in, always `directory` itself.",
+    "projects[].manifest": "Its gemspec, from the directory the CLI runs in, or the `Gemfile` when the checkout carries no gemspec.",
+    "projects[].name": "Name the gemspec declares, or `null` when there is none to read it from.",
+    "dependencies": "What the manifests declare, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every `gem` call the reader saw, in the order they appear.",
+    "dependencies.direct[].name": "Gem name, such as `rails`.",
+    "dependencies.direct[].version": "Requirement exactly as written, such as `~> 7.1`, or `null` when the call names none and any version will do.",
+    "dependencies.direct[].scopes": "The Bundler groups the gem is in: `default` when the call is at the top level, otherwise the `group` it sits inside, such as `development` or `test`.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the requirement names one exact version. A `~>`, a `>=`, a `git:` or a `path:` option is not pinned.",
+    "dependencies.direct[].origin": "Where it comes from: `registry`, `git` when the call carries a `git:` or `github:` option, or `path` when it carries a `path:` option.",
+    "dependencies.transitive": "Always empty. What `Gemfile.lock` resolves is not read: `lockfiles` says whether one is committed.",
+    "lockfiles": "`Gemfile.lock` when it is committed, from the directory the CLI runs in. An application without one resolves differently on every deploy.",
+    "unparsed": "Every manifest the reader could not open, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

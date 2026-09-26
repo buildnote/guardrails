@@ -1,0 +1,10 @@
+name: build
+on: pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@%s
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - run: ./gradlew build

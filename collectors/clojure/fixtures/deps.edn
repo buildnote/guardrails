@@ -1,0 +1,16 @@
+{:paths ["src" "resources"]
+
+ ;; the libraries the service links
+ :deps {org.clojure/clojure {:mvn/version "1.11.3"}
+        ring/ring-core {:mvn/version "1.12.1"}
+        cheshire/cheshire {:mvn/version "RELEASE"}
+        io.github.company/queue {:git/url "https://github.com/company/queue"
+                              :git/sha "6f3a1c2d9b8e4f7a0c5d2e1b3a4f5c6d7e8f9a0b"}
+        io.github.company/drift {:git/url "https://github.com/company/drift"}
+        company/local {:local/root "../local"}}
+
+ :mvn/repos {"clojars" {:url "https://repo.clojars.org/"}
+             "internal" {}}
+
+ :aliases
+ {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}}}}

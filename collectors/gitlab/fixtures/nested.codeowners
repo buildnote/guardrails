@@ -1,0 +1,5 @@
+[Vendored] @company/vendors
+lib/**/vendor
+
+[Apps] @company/apps
+apps/

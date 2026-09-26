@@ -1,0 +1,68 @@
+{
+  "results": [
+    {
+      "source": { "path": "buildnote-app/yarn.lock", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "semver", "version": "7.3.7", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-c2qf-rxjj-qqgw",
+              "aliases": ["CVE-2022-25883"],
+              "summary": "semver vulnerable to Regular Expression Denial of Service",
+              "database_specific": { "severity": "MODERATE" },
+              "affected": [
+                {
+                  "package": { "name": "semver", "ecosystem": "npm" },
+                  "ranges": [
+                    { "type": "SEMVER", "events": [{ "introduced": "7.0.0" }, { "fixed": "7.5.2" }] }
+                  ]
+                }
+              ],
+              "severity": [{ "type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H" }]
+            }
+          ],
+          "groups": [{ "ids": ["GHSA-c2qf-rxjj-qqgw"], "aliases": ["CVE-2022-25883"], "max_severity": "5.3" }]
+        },
+        {
+          "package": { "name": "tar", "version": "6.1.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-f5x3-32g6-xq36",
+              "aliases": ["CVE-2021-37713"],
+              "summary": "Arbitrary File Creation/Overwrite via insufficient absolute path sanitization",
+              "affected": [
+                {
+                  "ranges": [
+                    { "type": "SEMVER", "events": [{ "introduced": "6.0.0" }, { "fixed": "6.1.9" }] }
+                  ]
+                }
+              ]
+            }
+          ],
+          "groups": [{ "ids": ["GHSA-f5x3-32g6-xq36"], "max_severity": "8.2" }]
+        }
+      ]
+    },
+    {
+      "source": { "path": "go.mod", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "github.com/gogo/protobuf", "version": "1.3.1", "ecosystem": "Go" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-c3h9-896r-86jm",
+              "aliases": ["CVE-2021-3121"],
+              "summary": "Improper Handling of Unexpected Data Type in github.com/gogo/protobuf",
+              "database_specific": { "severity": "HIGH" },
+              "affected": [
+                { "ranges": [{ "type": "SEMVER", "events": [{ "introduced": "0" }, { "fixed": "1.3.2" }] }] }
+              ]
+            }
+          ],
+          "groups": [{ "ids": ["GHSA-c3h9-896r-86jm"], "max_severity": "8.6" }]
+        }
+      ]
+    }
+  ]
+}

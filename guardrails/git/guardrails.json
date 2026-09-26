@@ -1,0 +1,145 @@
+{
+  "version": "v1",
+  "category": "git",
+  "icon": "icon.svg",
+  "inputs": {
+    "baseRef": {
+      "default": "origin/main",
+      "description": "Ref the range starts at. The commits checked are `<baseRef>..HEAD`."
+    }
+  },
+  "collect": [
+    "git"
+  ],
+  "guardrails": {
+    "conventional-commits": {
+      "name": "Commits follow Conventional Commits",
+      "description": "Every commit message in the build range follows the Conventional Commits specification, including the subject line, the blank line before the body, and the BREAKING CHANGE footer.",
+      "severity": "error",
+      "remediation": "Rewrite each offending commit message as `type(scope): description`, for example `fix(api): reject expired tokens`. The scope is optional, but if you give one it must name something. A `!` before the colon marks a breaking change, and the colon is followed by a space and a description. The body starts after one blank line, and a breaking change described in the footer is written as `BREAKING CHANGE: <description>`, in uppercase. See the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/).",
+      "check": {
+        "run": "conventional-commits.py",
+        "timeoutSeconds": 60
+      },
+      "inputs": {
+        "types": {
+          "default": "feat|fix|chore|refactor|test|docs|build|ci|perf|style|revert",
+          "description": "Types accepted before the colon, as a regular expression alternation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-merge-commits": {
+      "name": "No merge commits",
+      "description": "The build range contains no merge commits.",
+      "severity": "warning",
+      "remediation": "Rebase your branch onto the base ref instead of merging into it:\n\n```bash\ngit fetch origin\ngit rebase origin/main\n```\n\nSee [Git Branching: Rebasing](https://git-scm.com/book/en/v2/Git-Branching-Rebasing).",
+      "check": {
+        "run": "no-merge-commits.py",
+        "timeoutSeconds": 60
+      },
+      "maxViolations": 0
+    },
+    "work-item-reference": {
+      "name": "Commits reference a work item",
+      "description": "Every commit in the build range, or the branch it is on, references the change record it belongs to.",
+      "severity": "warning",
+      "remediation": "Put the ticket key in the commit subject or body, or in the branch name:\n\n```\nfeat(ledger): round half to even on settlement\n\nRefs: COMPANY-1423\n```\n\nWhen auditors test change management, they sample production changes and ask to see the approved record behind each one. A commit that can't be linked to a record is the finding, whatever the record says.",
+      "check": {
+        "run": "work-item-reference.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "pattern": {
+          "default": "[A-Z][A-Z0-9]+-[0-9]+",
+          "description": "Regular expression a work item reference must match. The default matches Jira keys; use `#[0-9]+` for GitHub issues."
+        },
+        "allowBranch": {
+          "default": "true",
+          "description": "Whether a reference in the branch name covers every commit on it."
+        }
+      },
+      "maxViolations": 0
+    },
+    "author-identity-domain": {
+      "name": "Commits come from a known identity",
+      "description": "Every commit in the build range was authored and committed with an email address on a domain your organisation controls.",
+      "severity": "warning",
+      "remediation": "Set your git identity to the email address your organisation issued, either for the repository or globally:\n\n```bash\ngit config user.email dana@company.com\n```\n\nGitHub's `users.noreply.github.com` addresses are excluded by default because they can't be matched to an identity provider, and that match is what ties a commit to a person whose access can be recertified.",
+      "check": {
+        "run": "author-identity-domain.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "domains": {
+          "default": "",
+          "description": "Comma separated domains an address may be on. If empty, the guardrail skips, because it can't know your domains."
+        },
+        "allowBots": {
+          "default": "true",
+          "description": "Whether an address ending in `[bot]@users.noreply.github.com` is accepted, for commits authored by an app."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-wip-commits": {
+      "name": "No work in progress commits",
+      "description": "The build range contains no commit whose subject says it was never meant to be merged.",
+      "severity": "warning",
+      "remediation": "Clean up the range before merging:\n\n```bash\ngit rebase --interactive --autosquash origin/main\n```\n\n`--autosquash` folds `fixup!` and `squash!` commits into the commits they name. A `WIP` commit on a protected branch is a change nobody described, which is the same evidence problem as a commit with no work item.",
+      "check": {
+        "run": "no-wip-commits.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "markers": {
+          "default": "fixup!,squash!,amend!,WIP,wip:,TEMP,DO NOT MERGE",
+          "description": "Comma separated markers that mark a commit subject as work in progress."
+        }
+      },
+      "maxViolations": 0
+    },
+    "changed-lines-budget": {
+      "name": "The change is few enough lines to review",
+      "description": "The build range adds and removes few enough lines that a reviewer can read the whole change before approving it.",
+      "severity": "info",
+      "remediation": "Split the change, or land it as a stack of pull requests that are each small enough to read. Review quality drops sharply as more lines are put in front of a reviewer, and an approval on a change nobody could read makes review a control that exists on paper only.\n\nIf the lines are unavoidable (a generated file, a lock file, a formatting pass or a mass rename), list those paths in `ignore` so only the lines a reviewer reads are counted. Otherwise, raise `maxLines` for that run instead of removing the guardrail, so the exception stays visible.\n\nBinary files have no line count and are not counted.",
+      "check": {
+        "run": "changed-lines-budget.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxLines": {
+          "default": "500",
+          "description": "Maximum number of lines the range may add and remove combined."
+        },
+        "ignore": {
+          "default": "",
+          "description": "Comma separated globs excluded from the count, for generated files and lock files a reviewer does not read line by line."
+        }
+      },
+      "maxViolations": 0
+    },
+    "changed-files-budget": {
+      "name": "The change is small enough to review",
+      "description": "The build range changes few enough files that a reviewer can hold the whole change in their head.",
+      "severity": "info",
+      "remediation": "Split the change. A review that can't be done properly is a control that exists on paper only, and reviewer attention drops sharply with size: an approval on a pull request touching a thousand files proves nothing.\n\nIf a large change is unavoidable (a rename, a generated file or a dependency bump), raise `maxFiles` for that run instead of removing the guardrail, so the exception stays visible.",
+      "check": {
+        "run": "changed-files-budget.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxFiles": {
+          "default": "50",
+          "description": "Maximum number of files the range may change."
+        },
+        "ignore": {
+          "default": "",
+          "description": "Comma separated globs excluded from the count, for generated files and lock files a reviewer does not read line by line."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "version": "v1",
+  "category": "nodejs",
+  "icon": "icon.svg",
+  "collect": [
+    "nodejs"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Node.js version is declared",
+      "description": "The project declares the Node.js version it is built and run against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the runtime where the project already describes itself: `\"engines\": { \"node\": \">=20\" }` in `package.json`, or an `.nvmrc` file naming the exact release. Without one, the runtime is whatever the runner happens to have, so a syntax or standard library difference shows up in CI instead of on the laptop where it was introduced.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "18",
+          "description": "Oldest Node.js version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lockfile-committed": {
+      "name": "Node.js dependencies are locked",
+      "description": "The project commits a lock file, so an install of the same commit resolves the same versions.",
+      "severity": "warning",
+      "remediation": "Commit the lock file your package manager writes:\n\n```bash\nnpm install      # writes package-lock.json\npnpm install     # writes pnpm-lock.yaml\nyarn install     # writes yarn.lock\n```\n\nA `^` or `~` range resolves to whatever the registry serves that day, so without a lock file the build that shipped is not the build that was reviewed.",
+      "check": {
+        "run": "lockfile-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "single-package-manager": {
+      "name": "One package manager owns the tree",
+      "description": "The project commits at most one lock file, so two package managers don't both try to manage the dependency tree.",
+      "severity": "warning",
+      "remediation": "Pick the package manager the project actually uses and delete the other lock files. A checkout with both `package-lock.json` and `pnpm-lock.yaml` installs different versions depending on which command the developer or CI step runs. The lock file nobody uses drifts silently until someone does use it.",
+      "check": {
+        "run": "single-package-manager.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "package-manager-pinned": {
+      "name": "Package manager is pinned",
+      "description": "The manifest names the package manager and the exact version Corepack should install.",
+      "severity": "warning",
+      "remediation": "Name the package manager and its version in `package.json`. This is the version Corepack installs:\n\n```json\n{\n  \"packageManager\": \"pnpm@9.1.0\"\n}\n```\n\nWithout this field, or with a name but no version, the install runs under whichever npm, pnpm or yarn the runner happens to have. A lock file written by one package manager is then resolved by another, and the tree a developer reviewed is not the tree CI installs.",
+      "check": {
+        "run": "package-manager-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

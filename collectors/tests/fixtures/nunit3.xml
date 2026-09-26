@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-run id="0" runstate="Runnable" testcasecount="4" result="Failed" total="4" passed="2" failed="1" inconclusive="0" skipped="1" asserts="4" engine-version="3.12.0.0" start-time="2026-08-20T10:23:41.4594179Z" duration="0.230308">
+  <test-suite type="Assembly" id="1-1011" name="DotnetTests.NUnitV3Tests.dll" fullname="/build/DotnetTests.NUnitV3Tests.dll" runstate="Runnable" testcasecount="4" result="Failed" duration="0.082553" total="4" passed="2" failed="1" skipped="1">
+    <test-suite type="TestFixture" id="1-1000" name="CalculatorTests" fullname="DotnetTests.NUnitV3Tests.CalculatorTests" classname="DotnetTests.NUnitV3Tests.CalculatorTests" runstate="Runnable" testcasecount="4" result="Failed" duration="0.075896">
+      <test-case id="1-1001" name="Adds_Two_Numbers" fullname="DotnetTests.NUnitV3Tests.CalculatorTests.Adds_Two_Numbers" methodname="Adds_Two_Numbers" classname="DotnetTests.NUnitV3Tests.CalculatorTests" runstate="Runnable" result="Passed" start-time="2026-08-20T10:23:41.4684284Z" duration="0.004321" asserts="1"/>
+      <test-case id="1-1002" name="Divides_By_Zero" fullname="DotnetTests.NUnitV3Tests.CalculatorTests.Divides_By_Zero" methodname="Divides_By_Zero" classname="DotnetTests.NUnitV3Tests.CalculatorTests" runstate="Runnable" result="Failed" label="Error" duration="0.022805" asserts="0">
+        <failure>
+          <message><![CDATA[System.DivideByZeroException : Attempted to divide by zero.]]></message>
+          <stack-trace><![CDATA[   at DotnetTests.Unit.Calculator.Div(Int32 a, Int32 b)]]></stack-trace>
+        </failure>
+      </test-case>
+      <test-case id="1-1003" name="Subtracts_Two_Numbers" fullname="DotnetTests.NUnitV3Tests.CalculatorTests.Subtracts_Two_Numbers" methodname="Subtracts_Two_Numbers" classname="DotnetTests.NUnitV3Tests.CalculatorTests" runstate="Runnable" result="Passed" duration="0.001500" asserts="1"/>
+      <test-case id="1-1004" name="Uses_External_Service" fullname="DotnetTests.NUnitV3Tests.CalculatorTests.Uses_External_Service" methodname="Uses_External_Service" classname="DotnetTests.NUnitV3Tests.CalculatorTests" runstate="Ignored" result="Skipped" label="Ignored" duration="0.000180" asserts="0">
+        <reason>
+          <message><![CDATA[service unavailable in CI]]></message>
+        </reason>
+      </test-case>
+    </test-suite>
+  </test-suite>
+</test-run>

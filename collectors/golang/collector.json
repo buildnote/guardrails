@@ -1,0 +1,45 @@
+{
+  "id": "golang",
+  "version": "v1",
+  "name": "Go build",
+  "description": "The Go build in the project directory: the module it declares, the Go version it asks for, every module of a workspace, the modules it requires directly and indirectly, and the replacements and lock file beside them.",
+  "icon": "icon.svg",
+  "run": "golang.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: `go.work` when the checkout is a workspace, `go.mod` otherwise.",
+    "sources": "Every manifest that was read and understood, in the order they were read. A manifest the reader could not handle is in `unparsed` instead.",
+    "declared": "The Go version the build declares, or `null` when it declares none.",
+    "declared.version": "Version as the `go` directive writes it, such as `1.22`.",
+    "declared.source": "Manifest declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a floor or a range. Always `false` for Go, because the `go` directive is the lowest version the module builds with rather than the one the toolchain uses.",
+    "toolchain": "Version the `toolchain` directive selects, such as `go1.22.3`, or `null` when the module names none and the `go` directive decides.",
+    "projects": "Every module in the build: the workspace's `use` entries, or the one module the checkout is.",
+    "projects[].path": "Directory of the module, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "That module's `go.mod`, from the directory the CLI runs in, or `null` when the workspace names a directory carrying none.",
+    "projects[].name": "Module path the `module` directive declares, such as `github.com/company/widget`, or `null` when it declares none.",
+    "dependencies": "What the manifests require, split by whether the module asks for it itself.",
+    "dependencies.direct": "Every module required without an `// indirect` marker, which is what this build imports itself.",
+    "dependencies.direct[].name": "Module path required, such as `github.com/spf13/cobra`.",
+    "dependencies.direct[].version": "Version required, as written.",
+    "dependencies.direct[].scopes": "Always `[\"default\"]`. Go modules carry no scope, so a dependency used only by tests is indistinguishable from one the binary links.",
+    "dependencies.direct[].source": "Manifest that requires it, from the directory the CLI runs in.",
+    "dependencies.transitive": "Every module required with an `// indirect` marker, which exists to pin what a dependency of a dependency resolves to. Shaped as `direct`.",
+    "replaced": "Every module a `replace` directive redirects, meaning a dependency whose source is not the one its path names.",
+    "replaced[].name": "Module path being replaced.",
+    "replaced[].with": "What it is replaced by, as written, a module path or a directory.",
+    "replaced[].source": "Manifest declaring the replacement, from the directory the CLI runs in.",
+    "lockfiles": "Every lock file committed beside a manifest, from the directory the CLI runs in. `go.sum` records the checksum of every module in the graph.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a build that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

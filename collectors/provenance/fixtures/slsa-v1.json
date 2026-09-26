@@ -1,0 +1,22 @@
+{
+  "_type": "https://in-toto.io/Statement/v1",
+  "predicateType": "https://slsa.dev/provenance/v1",
+  "subject": [
+    {
+      "name": "widget-1.4.0.jar",
+      "digest": {"sha256": "3f786850e387550fdab836ed7e6dc881de23001b5b6e9f0b1ad1a4f0e0d0a1c2"}
+    }
+  ],
+  "predicate": {
+    "buildDefinition": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "externalParameters": {
+        "source": {
+          "uri": "git+https://github.com/company/widget@refs/tags/v1.4.0",
+          "digest": {"gitCommit": "9b2c1d4e6f8a0b3c5d7e9f1a2b4c6d8e0f1a2b3c"}
+        }
+      }
+    },
+    "runDetails": {"builder": {"id": "https://github.com/actions/runner/github-hosted"}}
+  }
+}

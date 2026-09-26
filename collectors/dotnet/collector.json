@@ -1,0 +1,52 @@
+{
+  "id": "dotnet",
+  "version": "v1",
+  "name": ".NET build",
+  "description": "The .NET build in the project directory: the SDK it pins, every project file and the frameworks each targets, the packages they reference and which of them are pinned or supplied centrally, and the lock files beside them.",
+  "icon": "icon.svg",
+  "run": "dotnet.py",
+  "timeoutSeconds": 45,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    },
+    "maxProjects": {
+      "default": "200",
+      "description": "Maximum number of project files to describe. A larger solution carries the ones found first in path order."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: the solution when the checkout has one, otherwise the first project file found.",
+    "sources": "Every project file, `global.json` and `Directory.Packages.props` that was read and understood. One the reader could not handle is in `unparsed` instead.",
+    "declared": "The SDK version `global.json` pins, or `null` when the checkout pins none and whatever SDK the runner has is used.",
+    "declared.version": "Version exactly as written, such as `8.0.204`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the SDK is held to that version. A `rollForward` other than `disable` lets a newer SDK take over, so it is not pinned.",
+    "rollForward": "The `rollForward` policy `global.json` declares, such as `latestFeature`, or `null` when it declares none.",
+    "targetFrameworks": "Every target framework moniker any project declares, sorted, such as `net8.0`. A project targeting several carries all of them.",
+    "solution": "Path of the solution file, from the directory the CLI runs in, or `null` when the checkout carries none.",
+    "centralPackageManagement": "Whether a `Directory.Packages.props` declares the versions centrally, which is what makes a `PackageReference` without a version correct rather than broken.",
+    "projects": "Every project file found, in path order.",
+    "projects[].path": "Directory of the project, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "The project file, from the directory the CLI runs in.",
+    "projects[].name": "Assembly name the project declares, or the project file's own stem when it declares none.",
+    "projects[].targetFrameworks": "Target framework monikers that project declares.",
+    "dependencies": "What the projects reference, split by whether the build asks for it itself.",
+    "dependencies.direct": "Every `PackageReference` any project declares, in project order.",
+    "dependencies.direct[].name": "Package id, such as `Serilog`.",
+    "dependencies.direct[].version": "Version exactly as written, or `null` when the reference carries none and a central version supplies it.",
+    "dependencies.direct[].scopes": "`default`, or `development` when the reference sets `PrivateAssets` to `all`, which keeps it out of what consumers restore.",
+    "dependencies.direct[].source": "Project file declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the version names one exact release. A floating `8.0.*`, a range in brackets and an unresolved `$(Property)` are not pinned.",
+    "dependencies.direct[].managedBy": "`Directory.Packages.props` when a central `PackageVersion` supplied the version, or `null` when the reference carried its own.",
+    "dependencies.transitive": "Always empty. What `packages.lock.json` resolves is not read: `lockfiles` says whether one is committed.",
+    "lockfiles": "Every `packages.lock.json` committed, from the directory the CLI runs in. Restore only honours them when the build sets `RestorePackagesWithLockFile`.",
+    "dropped": "Project files left out because `maxProjects` was reached. Above zero, `projects` and `dependencies` describe only part of the solution.",
+    "unparsed": "Every file the reader could not handle, so a guardrail can tell a build that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that file, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

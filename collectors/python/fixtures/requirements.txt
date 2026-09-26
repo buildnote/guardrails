@@ -1,0 +1,4 @@
+# pinned by the resolver
+httpx==0.27.0
+pydantic==2.7.1
+-r other.txt

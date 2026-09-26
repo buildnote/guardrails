@@ -1,0 +1,30 @@
+stages:
+  - build
+  - deploy
+
+default:
+  image: gradle:8.10-jdk21
+
+variables:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+
+build:
+  stage: build
+  tags:
+    - docker
+  timeout: 15 minutes
+  interruptible: true
+  script:
+    - ./gradlew check
+
+deploy:
+  stage: deploy
+  timeout: 30 minutes
+  needs:
+    - job: build
+  environment:
+    name: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - ./deploy.sh

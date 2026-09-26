@@ -1,0 +1,45 @@
+{
+  "id": "tests",
+  "version": "v1",
+  "name": "Test results",
+  "description": "The test results the build already wrote, read from whichever report format it left behind and normalized into one shape: the totals across every report, and the cases that failed, errored or were skipped. Passing cases are left out, because guardrails gate on the others and Buildnote already records every case as a test event. Nothing identifies a case across reports, so when a build writes both a report per class and a merged report, every case is counted in both.",
+  "icon": "icon.svg",
+  "run": "tests.py",
+  "timeoutSeconds": 60,
+  "inputs": {
+    "reports": {
+      "default": "TEST-*.xml,*-test-report.xml,junit*.xml,test-results*.xml,*.trx,*-ctrf.json,open-test-report.xml",
+      "description": "Comma separated globs matched against every file in the working directory and against bare file names, naming the test reports to read."
+    },
+    "maxFailures": {
+      "default": "50",
+      "description": "Maximum number of cases to carry in `failures` and in `skipped`, each counted separately. The totals still include cases that are dropped."
+    }
+  },
+  "facts": {
+    "source": "`report` when a test report was read, `none` when there was none.",
+    "reason": "Why nothing was read, present only when `source` is `none`.",
+    "reports": "Every report that was read, in path order.",
+    "reports[].path": "Path of the report, relative to the directory the CLI runs in.",
+    "reports[].modified": "When the report was last written, in ISO 8601, so you can spot a stale report.",
+    "reports[].format": "Format it was read as: `junit`, `nunit`, `trx`, `otr` or `ctrf`.",
+    "totals.tests": "Cases across every report that was read, summed rather than deduplicated.",
+    "totals.passed": "Cases that passed.",
+    "totals.failed": "Cases that failed an assertion.",
+    "totals.errors": "Cases that ended in an error rather than a failed assertion.",
+    "totals.skipped": "Cases that were skipped, ignored or left inconclusive.",
+    "totals.durationMs": "How long the reports say the cases took, summed, or `null` when no report stated a duration.",
+    "suites": "How many report files contributed to the totals.",
+    "failures": "The failed and errored cases, up to `maxFailures`.",
+    "failures[].name": "Name of the case, as the report gave it.",
+    "failures[].classname": "Class or suite the case belongs to, or `null` when the report names none.",
+    "failures[].status": "`failed` for a failed assertion, `error` for a case that ended in an error.",
+    "failures[].file": "File the case was declared in, or `null` when the report names none.",
+    "skipped": "The skipped cases, up to `maxFailures`.",
+    "skipped[].name": "Name of the case, as the report gave it.",
+    "skipped[].classname": "Class or suite the case belongs to, or `null` when the report names none.",
+    "skipped[].status": "Always `skipped`.",
+    "skipped[].file": "File the case was declared in, or `null` when the report names none.",
+    "dropped": "Cases left out of `failures` and `skipped` because `maxFailures` was reached."
+  }
+}

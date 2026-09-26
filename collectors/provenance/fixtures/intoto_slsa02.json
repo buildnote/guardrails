@@ -1,0 +1,35 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "buildnote-collector.zip",
+      "digest": { "sha256": "b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c" }
+    }
+  ],
+  "predicate": {
+    "builder": { "id": "https://github.com/Attestations/GitHubHostedActions@v1" },
+    "buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+    "invocation": {
+      "configSource": {
+        "uri": "git+https://github.com/buildnote/buildnote@refs/heads/main",
+        "digest": { "sha1": "8c90e284f2b1a70dfd51c3b6a9e4f0dd12ab34cd" },
+        "entryPoint": ".github/workflows/deploy.yml"
+      },
+      "parameters": {},
+      "environment": { "arch": "amd64", "os": "ubuntu24" }
+    },
+    "metadata": {
+      "buildInvocationId": "10442331987-1",
+      "buildStartedOn": "2026-08-20T09:44:51Z",
+      "completeness": { "parameters": true, "environment": false, "materials": false },
+      "reproducible": false
+    },
+    "materials": [
+      {
+        "uri": "git+https://github.com/buildnote/buildnote@refs/heads/main",
+        "digest": { "sha1": "8c90e284f2b1a70dfd51c3b6a9e4f0dd12ab34cd" }
+      }
+    ]
+  }
+}

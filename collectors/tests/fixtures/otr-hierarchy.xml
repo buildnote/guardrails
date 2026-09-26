@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <h:execution xmlns:h="https://schemas.opentest4j.org/reporting/hierarchy/0.2.0"
+                     xmlns="https://schemas.opentest4j.org/reporting/core/0.2.0"
+                     xmlns:java="https://schemas.opentest4j.org/reporting/java/0.2.0">
+          <h:root duration="PT0.550S" name="JUnit Jupiter" start="2026-08-20T09:15:00.100000Z">
+            <result status="FAILED"/>
+            <h:child duration="PT0.310S" name="CalculatorTests" start="2026-08-20T09:15:00.250000Z">
+              <sources>
+                <java:classSource className="com.example.CalculatorTests"/>
+              </sources>
+              <result status="FAILED"/>
+              <h:child duration="PT0.075S" name="addsTwoNumbers()" start="2026-08-20T09:15:00.400000Z">
+                <result status="SUCCESSFUL"/>
+              </h:child>
+              <h:child duration="PT0.050S" name="dividesByZero()" start="2026-08-20T09:15:00.480000Z">
+                <result status="FAILED"/>
+              </h:child>
+              <h:child duration="PT0.040S" name="convertsCelsius()" start="2026-08-20T09:15:00.580000Z">
+                <result status="ABORTED"/>
+              </h:child>
+            </h:child>
+          </h:root>
+        </h:execution>

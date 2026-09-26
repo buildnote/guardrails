@@ -1,0 +1,50 @@
+{
+  "version": "v1",
+  "category": "jenkins",
+  "icon": "icon.svg",
+  "collect": [
+    "jenkins"
+  ],
+  "inputs": {
+    "jenkinsfiles": {
+      "default": "Jenkinsfile,Jenkinsfile.*,*.Jenkinsfile",
+      "description": "Comma separated globs naming the Jenkinsfiles to read."
+    }
+  },
+  "guardrails": {
+    "job-timeout-set": {
+      "name": "Pipelines declare a timeout",
+      "description": "Every declarative pipeline declares how long it may run, either on the pipeline itself or on every stage, so a hung build is stopped instead of holding an executor.",
+      "severity": "info",
+      "remediation": "Declare a timeout on the pipeline, where it covers every stage:\n\n```groovy\npipeline {\n  options {\n    timeout(time: 30, unit: 'MINUTES')\n  }\n}\n```\n\nJenkins has no default timeout. A hung build holds its executor until someone notices and aborts it by hand, and on a controller with only a few executors, one stuck stage can stop the whole queue. An `options` block on a stage covers that stage and every stage nested inside it, so either the pipeline declares a timeout or each of its stages does.\n\nScripted pipelines are skipped, not reported: there, `timeout` is a step in ordinary Groovy, so not finding one doesn't prove it isn't there.",
+      "check": {
+        "run": "job-timeout-set.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxMinutes": {
+          "default": "60",
+          "description": "Longest timeout accepted. A stage that declares more than this is treated as having no timeout."
+        }
+      },
+      "maxViolations": 0
+    },
+    "shared-library-pinned": {
+      "name": "Shared libraries are loaded at a fixed revision",
+      "description": "Every `@Library` annotation and `library` step names a tag or a commit SHA instead of a branch, so the library code a build runs can't change underneath it.",
+      "severity": "error",
+      "remediation": "Name a specific version, and make it one that doesn't move:\n\n```groovy\n@Library('company-pipeline@1.4.2') _\n```\n\nA library loaded from a branch is code that anyone who can push to that branch can run inside your build, with every credential the job has in scope. Two builds of the same commit can also run different library code. A reference with no version at all is worse: it uses the default version configured on the controller, which is usually a branch and lives outside this repository, so you can't tell from the Jenkinsfile what ran.\n\nJenkins can't tell a tag from a branch by name, so this guardrail checks the shape of the ref: a 40 character commit SHA, or a version such as `1.4.2` or `v1.4.2`. Protect the tags you pin to, because git also lets a tag move.\n\nScripted pipelines are read too, but only by pattern. A library loaded through ordinary Groovy isn't detected, so a finding there is real but finding nothing is not proof. A scripted file doesn't suppress findings in its sibling files, and the check skips only when every Jenkinsfile is scripted and none of them names a library that could be read.",
+      "check": {
+        "run": "shared-library-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allow": {
+          "default": "",
+          "description": "Comma separated shared library names exempt from pinning, for libraries your own organisation publishes. Globs such as `company-*` are supported."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

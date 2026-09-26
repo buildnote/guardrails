@@ -1,0 +1,7 @@
+<testsuites time="1.0">
+            <testsuite name="outer">
+                <testsuite name="inner">
+                    <testcase name="a"/>
+                </testsuite>
+            </testsuite>
+        </testsuites>

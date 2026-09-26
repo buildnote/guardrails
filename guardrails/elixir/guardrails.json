@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "category": "elixir",
+  "icon": "icon.svg",
+  "collect": [
+    "elixir"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Elixir version is declared",
+      "description": "The project declares the Elixir version it compiles against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the Elixir version in the `project` function of `mix.exs`, where the project already describes itself:\n\n```elixir\ndef project do\n  [\n    app: :widget,\n    version: \"1.2.3\",\n    elixir: \"~> 1.16\"\n  ]\nend\n```\n\nWithout it, Mix compiles with whatever Elixir the runner has installed, so a macro or standard library difference between releases shows up in CI instead of on the laptop that introduced it.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "1.14",
+          "description": "Oldest Elixir version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lockfile-committed": {
+      "name": "Elixir dependencies are locked",
+      "description": "The project commits `mix.lock`, so fetching the same commit resolves the same packages and verifies them.",
+      "severity": "warning",
+      "remediation": "Resolve your dependencies once and commit the lock file Mix writes:\n\n```bash\nmix deps.get\ngit add mix.lock\n```\n\n`mix.lock` pins every package to one version along with its checksum. Without it, an application resolves whatever Hex serves that day and checks nothing against what was reviewed.",
+      "check": {
+        "run": "lockfile-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-git-dependencies": {
+      "name": "No dependency is fetched from git",
+      "description": "No dependency the project declares is fetched from a git repository.",
+      "severity": "warning",
+      "remediation": "Take the dependency from Hex instead of from a git repository:\n\n```elixir\n{:widget_ui, \"~> 1.4\"}\n```\n\nIf the package is yours and unpublished, publish it to a private Hex organisation. A `git:` or `github:` tuple tracks a branch its owner can move or force push. It is also compiled from source at fetch time, not taken from a release Hex has published and checksummed, so two builds of the same commit can compile different code.",
+      "check": {
+        "run": "no-git-dependencies.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

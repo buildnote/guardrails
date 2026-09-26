@@ -1,0 +1,14 @@
+{
+  "src/widget.ts": {
+    "path": "src/widget.ts",
+    "statementMap": {
+      "0": {"start": {"line": 3, "column": 2}, "end": {"line": 3, "column": 20}},
+      "1": {"start": {"line": 8, "column": 2}, "end": {"line": 8, "column": 16}}
+    },
+    "s": {"0": 4, "1": 0},
+    "branchMap": {"0": {"loc": {}}},
+    "b": {"0": [2, 0]},
+    "fnMap": {},
+    "f": {}
+  }
+}

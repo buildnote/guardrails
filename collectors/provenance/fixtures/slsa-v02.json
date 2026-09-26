@@ -1,0 +1,18 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {"name": "widget-image", "digest": {"sha256": "5c8f2b1d3e4a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e"}},
+    {"name": "widget-1.4.0.jar", "digest": {"sha512": "0a1b2c3d"}}
+  ],
+  "predicate": {
+    "builder": {"id": "https://buildkite.com/company/widget"},
+    "invocation": {
+      "configSource": {
+        "uri": "git+https://github.com/company/widget@refs/heads/main",
+        "digest": {"sha1": "1122334455667788990011223344556677889900"},
+        "entryPoint": ".buildkite/pipeline.yml"
+      }
+    }
+  }
+}

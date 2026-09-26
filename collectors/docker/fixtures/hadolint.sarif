@@ -1,0 +1,42 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Haskell Dockerfile Linter",
+          "version": "2.12.0",
+          "informationUri": "https://github.com/hadolint/hadolint"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DL3008",
+          "level": "warning",
+          "message": {"text": "Pin versions in apt get install."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "Dockerfile"},
+                "region": {"startLine": 2}
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DL3002",
+          "level": "error",
+          "message": {"text": "Last USER should not be root."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "Dockerfile"},
+                "region": {"startLine": 9}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

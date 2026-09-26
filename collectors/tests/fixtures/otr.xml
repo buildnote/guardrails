@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<events xmlns="https://schemas.opentest4j.org/reporting/events/0.1.0">
+  <started id="1" name="JUnit Jupiter" time="2026-08-25T10:00:00.000Z">
+    <metadata><type>CONTAINER</type></metadata>
+  </started>
+  <started id="2" name="QueueTest" parentId="1" time="2026-08-25T10:00:00.100Z">
+    <metadata><type>CONTAINER</type></metadata>
+    <sources><classSource className="com.company.widget.QueueTest"/></sources>
+  </started>
+  <started id="3" name="bounds the queue" parentId="2" time="2026-08-25T10:00:00.200Z">
+    <metadata><type>TEST</type></metadata>
+  </started>
+  <finished id="3" time="2026-08-25T10:00:00.450Z"><result status="SUCCESSFUL"/></finished>
+  <started id="4" name="rejects a negative limit" parentId="2" time="2026-08-25T10:00:00.460Z">
+    <metadata><type>TEST</type></metadata>
+  </started>
+  <finished id="4" time="2026-08-25T10:00:00.600Z"><result status="FAILED"/></finished>
+</events>

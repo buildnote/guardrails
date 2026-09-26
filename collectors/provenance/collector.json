@@ -1,0 +1,35 @@
+{
+  "id": "provenance",
+  "version": "v1",
+  "name": "Build provenance attestations",
+  "description": "What the build attested about the artifacts it produced, read from the in-toto statements it already wrote (bare or inside a DSSE envelope) and recorded exactly as each document states it. Nothing here verifies a signature.",
+  "icon": "icon.svg",
+  "run": "provenance.py",
+  "scope": "repository",
+  "timeoutSeconds": 60,
+  "inputs": {
+    "reports": {
+      "default": "*.intoto.jsonl,*.att.json,attestation*.json,provenance*.json,*.dsse.json",
+      "description": "Comma separated globs matched against every file in the working directory and against bare file names, naming the attestations to read."
+    }
+  },
+  "facts": {
+    "source": "`report` when an attestation was read, `none` when there was none.",
+    "reason": "Why nothing was read, present only when `source` is `none`.",
+    "reports": "Every file that was read, in path order. One file can carry several attestations.",
+    "reports[].path": "Path of the file, relative to the directory the CLI runs in.",
+    "reports[].modified": "When it was last written, ISO 8601, so an attestation older than the build is recognisable.",
+    "reports[].format": "Format it was read as, always `intoto`.",
+    "counts.total": "Attestations across every file that was read.",
+    "counts.signed": "Attestations that arrived inside a DSSE envelope. The envelope is recorded, never verified, so this counts attestations carrying a signature rather than attestations whose signature was checked.",
+    "attestations": "The attestations themselves.",
+    "attestations[].predicateType": "What the statement claims to be, such as `https://slsa.dev/provenance/v1`, or `null` when it names none.",
+    "attestations[].builder": "Identity the statement gives the builder that produced the subjects, or `null` when it names none.",
+    "attestations[].sourceUri": "Source the statement says was built, or `null` when it names none.",
+    "attestations[].sourceDigest": "Digest of that source, or `null` when the statement carries none.",
+    "attestations[].subjects": "The artifacts the statement is about.",
+    "attestations[].subjects[].name": "Name the statement gives the artifact, empty when it gives none.",
+    "attestations[].subjects[].digest": "Digest of the artifact, by algorithm, as the statement carries it.",
+    "attestations[].envelope": "`true` when the statement arrived inside a DSSE envelope, `false` when it arrived bare."
+  }
+}

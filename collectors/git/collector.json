@@ -1,0 +1,50 @@
+{
+  "id": "git",
+  "version": "v1",
+  "name": "Git repository and commit range",
+  "description": "The repository, HEAD, the remotes, and every commit between the base ref and HEAD with its message, author, parents, and the files the range changed with the lines it added and removed to each.",
+  "icon": "icon.svg",
+  "run": "git.py",
+  "scope": "repository",
+  "timeoutSeconds": 60,
+  "inputs": {
+    "baseRef": {
+      "default": "origin/main",
+      "description": "Ref the collected range starts at. The commits collected are `<baseRef>..HEAD`."
+    }
+  },
+  "facts": {
+    "repository": "Whether the CLI is running inside a git repository. Nothing else is collected when it is not.",
+    "root": "Absolute path of the working tree root, or `null` when git could not report it.",
+    "head.sha": "Full SHA of the commit checked out.",
+    "head.short": "First seven characters of that SHA.",
+    "head.branch": "Branch name checked out, or `null` when HEAD is detached.",
+    "head.detached": "Whether HEAD is detached rather than on a branch.",
+    "head.tags": "Tags pointing at HEAD.",
+    "remotes": "Remote name to fetch URL, as `git remote -v` reports them.",
+    "dirty": "Whether the working tree carries uncommitted changes, or `null` when git could not report it.",
+    "baseRef": "The `baseRef` input, as the guardrail configured it.",
+    "resolved": "Whether `baseRef` resolves in this checkout. A shallow clone is the usual reason it does not, and every guardrail over a range skips rather than failing when it is `false`.",
+    "baseSha": "SHA `baseRef` resolved to.",
+    "commits": "Every commit in `<baseRef>..HEAD`, newest first. Empty for a range with no commits, which is a pass rather than a skip.",
+    "commits[].sha": "Full SHA of the commit.",
+    "commits[].short": "First seven characters of that SHA.",
+    "commits[].parents": "SHAs of the commit's parents.",
+    "commits[].merge": "Whether the commit has more than one parent.",
+    "commits[].subject": "First line of the commit message.",
+    "commits[].message": "The whole commit message, trailing newlines removed.",
+    "commits[].body": "The message below the subject line.",
+    "commits[].author.name": "Author name.",
+    "commits[].author.email": "Author email.",
+    "commits[].author.date": "Author date, ISO 8601.",
+    "commits[].committer.name": "Committer name.",
+    "commits[].committer.email": "Committer email.",
+    "commits[].committer.date": "Commit date, ISO 8601.",
+    "changedFiles": "Paths `<baseRef>...HEAD` changed, relative to the working tree root.",
+    "changes": "Every path in `changedFiles` with the lines that range added and removed to it. Empty when the range could not be diffed.",
+    "changes[].path": "Path the change is to, as `changedFiles` states it. A rename is stated under the path it was renamed to.",
+    "changes[].added": "Lines added to the path, or `null` for a binary file, whose lines git does not count.",
+    "changes[].deleted": "Lines removed from the path, or `null` for a binary file.",
+    "changes[].binary": "Whether git read the file as binary, which is why it carries no line counts."
+  }
+}

@@ -1,0 +1,14 @@
+# Ownership for the widget repository.
+
+* @company/platform
+
+*.md @company/docs docs@company.example  # documentation, wherever it lives
+
+/build/logs/ @company/observability
+
+apps/ @company/apps
+
+lib/**/vendor @company/vendors
+
+# Generated, so nobody owns it.
+/service/generated/

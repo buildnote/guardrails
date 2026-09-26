@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<report name="broker">
+  <package name="com/company/broker">
+    <sourcefile name="Broker.kt">
+      <line nr="7" mi="0" ci="4"/>
+      <line nr="11" mi="3" ci="0"/>
+    </sourcefile>
+  </package>
+</report>

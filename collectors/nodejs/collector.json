@@ -1,0 +1,48 @@
+{
+  "id": "nodejs",
+  "version": "v1",
+  "name": "Node.js build",
+  "description": "The Node.js project in the project directory: its manifest, the Node version and package manager it asks for, every workspace it declares, the dependencies each manifest names and which of them are pinned, and the lock files committed beside them.",
+  "icon": "icon.svg",
+  "run": "nodejs.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    },
+    "maxWorkspaces": {
+      "default": "200",
+      "description": "Maximum number of workspace packages to describe. A larger monorepo carries the ones its globs resolve first."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in, always `package.json`.",
+    "sources": "Every manifest that was read and understood, in the order they were read. A manifest the reader could not handle is in `unparsed` instead.",
+    "declared": "The Node version the project asks for, or `null` when it asks for none. `.nvmrc` wins over `engines.node`, because it is what a developer's shell reads.",
+    "declared.version": "Constraint exactly as written, such as `>=20` or `20.11.1`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a range. A `>=`, a `^`, a `~`, an `x` or an `*` is not pinned.",
+    "packageManager": "The `packageManager` field, such as `pnpm@9.1.0`, which is what Corepack installs. `null` when the manifest names none and whatever the runner has is used.",
+    "projects": "Every package in the build: the root, followed by every workspace its `workspaces` globs resolve to.",
+    "projects[].path": "Directory of the package, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "That package's `package.json`, from the directory the CLI runs in.",
+    "projects[].name": "Name the manifest declares, or `null` when it declares none.",
+    "dependencies": "What the manifests declare, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every dependency any manifest declares, in manifest order.",
+    "dependencies.direct[].name": "Package name, such as `react` or `@company/widget`.",
+    "dependencies.direct[].version": "Constraint exactly as written, such as `^18.3.0`, a `workspace:*` protocol or a git URL.",
+    "dependencies.direct[].scopes": "Which of `dependencies`, `devDependencies`, `peerDependencies` and `optionalDependencies` declare it. A package in two carries both.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the constraint names one exact version. A `^`, a `~`, a range, a tag, a URL or a `workspace:` protocol is not pinned.",
+    "dependencies.transitive": "Always empty. What a lock file resolves is not read: `lockfiles` says whether one is committed, and reading a `package-lock.json` graph is the scanner's job rather than this collector's.",
+    "scripts": "Names of the scripts the root manifest declares. Names only, because a script body can carry a token.",
+    "lockfiles": "Every lock file committed, from the directory the CLI runs in. More than one means two package managers each believe they own the tree.",
+    "dropped": "Workspace packages left out because `maxWorkspaces` was reached. Above zero, `projects` and `dependencies` describe only part of the build.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

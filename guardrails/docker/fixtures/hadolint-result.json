@@ -1,0 +1,8 @@
+{
+      "ruleId": "%s",
+      "level": "%s",
+      "message": {"text": "%s"},
+      "locations": [
+        {"physicalLocation": {"artifactLocation": {"uri": "Dockerfile"}, "region": {"startLine": %d}}}
+      ]
+    }

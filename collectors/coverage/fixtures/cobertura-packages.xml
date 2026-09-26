@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
+<coverage line-rate="0.6667" branch-rate="0.5" lines-covered="4" lines-valid="6" branches-covered="1" branches-valid="2" complexity="0" version="7.6.1" timestamp="1755680900">
+  <sources>
+    <source>/repo/src</source>
+  </sources>
+  <packages>
+    <package name="app" line-rate="0.6667" branch-rate="0.5" complexity="0">
+      <classes>
+        <class name="calculator" filename="app/calculator.py" complexity="0" line-rate="0.5" branch-rate="0.5">
+          <methods/>
+          <lines>
+            <line number="1" hits="1"/>
+            <line number="4" hits="1"/>
+            <line number="7" hits="0" branch="true" condition-coverage="50% (1/2)"/>
+            <line number="8" hits="0"/>
+          </lines>
+        </class>
+        <class name="format" filename="app/format.py" complexity="0" line-rate="1.0" branch-rate="1.0">
+          <methods/>
+          <lines>
+            <line number="1" hits="3"/>
+            <line number="2" hits="3"/>
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>

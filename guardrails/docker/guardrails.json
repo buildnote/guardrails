@@ -1,0 +1,101 @@
+{
+  "version": "v1",
+  "category": "docker",
+  "icon": "icon.svg",
+  "collect": [
+    "docker"
+  ],
+  "guardrails": {
+    "base-pinned": {
+      "name": "Dockerfile base images are pinned",
+      "description": "Every image a Dockerfile builds from is pinned to a digest, so rebuilding the same commit starts from the same bytes.",
+      "severity": "error",
+      "remediation": "Pin the image to the digest its tag points to today, so the base can't change between rebuilds:\n\n```dockerfile\nFROM node:20.11.1-alpine@sha256:e4b0d6d6b1a2c2a58e8dd8a0e0b1f0d0c2c9f9c5b3a1e0d9c8b7a6f5e4d3c2b1 AS build\n```\n\nRun `docker buildx imagetools inspect node:20.11.1-alpine` to print the digest to paste in. Renovate and Dependabot both raise pull requests to update a pinned digest, so the pin stays maintained instead of frozen.\n\nA tag moves whenever the publisher pushes. Two builds of the same commit then produce different images, and the one an auditor asks about is not the one that ran.",
+      "check": {
+        "run": "base-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowTags": {
+          "default": "false",
+          "description": "Whether a tag other than `latest` counts as a pin. `false` requires a digest, the only kind of reference that resolves to the same image every time."
+        },
+        "registries": {
+          "default": "",
+          "description": "Comma separated registries an image may come from, such as `docker.io,ghcr.io`. Empty means any registry. An image naming no registry comes from Docker Hub, so name `docker.io` to allow those."
+        }
+      },
+      "maxViolations": 0
+    },
+    "nonroot-user": {
+      "name": "Dockerfiles run as a non-root user",
+      "description": "Every Dockerfile ends with a `USER` that is not root, so the container runs its process without privileges.",
+      "severity": "error",
+      "remediation": "Create an unprivileged user in the image and switch to it before the entrypoint:\n\n```dockerfile\nRUN addgroup -S app && adduser -S -G app app\nUSER app\n```\n\nThe container runs as the last `USER` in the file, so a Dockerfile that declares none runs as uid 0. When a container starts as root, a bug in the application becomes a root-level problem on the host: mounted paths are writable, capabilities can be granted, and an escape lands somewhere that matters.\n\nIf the process needs a low port such as 80, publish a high port to it (`docker run -p 80:8080`) instead of staying root to bind 80.",
+      "check": {
+        "run": "nonroot-user.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-build-secrets": {
+      "name": "Dockerfiles declare no credential arguments",
+      "description": "No `ARG` or `ENV` declared in a Dockerfile has a name that looks like a credential.",
+      "severity": "error",
+      "remediation": "Pass the credential in at build time with a secret mount, which leaves nothing behind in the image:\n\n```dockerfile\nRUN --mount=type=secret,id=npm_token \\\n    NPM_TOKEN=$(cat /run/secrets/npm_token) npm ci\n```\n\n```bash\ndocker build --secret id=npm_token,env=NPM_TOKEN .\n```\n\nAn `ARG` is recorded in the image history, and `docker history` prints it. An `ENV` stays in the image, and `docker inspect` prints it. Either way, anyone who can pull the image can read the value, and once a value has reached a registry you have to rotate it, because deleting it is not enough.\n\nThis guardrail only sees names, never values: the collector records neither the default next to an `ARG` nor the value next to an `ENV`. A name containing `TOKEN` is reason enough to rotate the credential.",
+      "check": {
+        "run": "no-build-secrets.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "patterns": {
+          "default": "*SECRET*,*TOKEN*,*PASSWORD*,*KEY*,*CREDENTIAL*",
+          "description": "Comma separated glob patterns, matched case-insensitively against the name of every `ARG` and every `ENV`. Only names are matched, because the collector records no values, which is what makes these facts safe to attach to a build."
+        }
+      },
+      "maxViolations": 0
+    },
+    "healthcheck": {
+      "name": "Dockerfiles declare a health check",
+      "description": "Every Dockerfile declares a `HEALTHCHECK`, so the orchestrator can tell a container that is running from one that is actually working.",
+      "severity": "warning",
+      "remediation": "Add a `HEALTHCHECK` to the Dockerfile that probes what the container exists to do, not just whether the process is alive:\n\n```dockerfile\nHEALTHCHECK --interval=30s --timeout=3s --start-period=20s \\\n  CMD curl -fsS http://localhost:8080/health || exit 1\n```\n\nWithout one, the runtime only knows that PID 1 hasn't exited. A process that is deadlocked, out of connections or serving 500s stays in the load balancer's rotation until somebody notices.\n\nIf you deploy to Kubernetes, a `readinessProbe` in the manifest does the same job and is a complete answer on its own, because the probe lives in the manifest instead of the image. List those Dockerfiles in `ignore`, which is matched as a glob against the path:\n\n```json\n{ \"use\": \"docker/healthcheck@v1\", \"with\": { \"ignore\": \"deploy/k8s/*/Dockerfile\" } }\n```\n\nAlso list images that run a job and exit there, since they are meant to stop and have nothing to keep reporting on.",
+      "check": {
+        "run": "healthcheck.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "finalStageOnly": {
+          "default": "true",
+          "description": "Whether only the last stage in the file is checked. A build stage is thrown away and never runs, so it has nothing to health check."
+        },
+        "ignore": {
+          "default": "",
+          "description": "Comma separated globs naming Dockerfiles to skip, such as one that only ever builds a job image."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lint-clean": {
+      "name": "Dockerfile lint findings are clean",
+      "description": "Every finding the Dockerfile linter reported is below the severity your team gates on.",
+      "severity": "warning",
+      "remediation": "Fix the findings listed in the violations, or deliberately disable a rule in `.hadolint.yaml` where it doesn't apply:\n\n```yaml\nignored:\n  - DL3008\n```\n\nRun the linter in your build before this guardrail, so there is a report to read:\n\n```bash\nhadolint --format sarif Dockerfile > hadolint.sarif\n```\n\nThe guardrail reads the report and never reruns the linter, so it judges the same findings your build acted on.",
+      "check": {
+        "run": "lint-clean.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "severity": {
+          "default": "high",
+          "description": "Lowest severity that counts as a violation, on the scale the collector normalises every report to. Findings below it are logged, not reported. One of `critical`, `high`, `medium`, `low`, `info`."
+        },
+        "ignore": {
+          "default": "",
+          "description": "Comma separated rule ids that are never a violation, such as `DL3008,DL3059`."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

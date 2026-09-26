@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app.kubernetes.io/name: web
+spec:
+  replicas: 2
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: web
+          image: nginx:1.25
+          command: ["nginx", "-g", "daemon off;"]
+          ports:
+          - containerPort: 8080
+          env:
+            - name: MODE
+              value: "production"
+          resources:
+            limits: {cpu: 500m, memory: 256Mi}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+...

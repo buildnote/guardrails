@@ -1,0 +1,57 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "buildnote-cli",
+  "documentNamespace": "https://anchore.com/syft/dir/buildnote-cli-6f0a2c11",
+  "creationInfo": {
+    "licenseListVersion": "3.23",
+    "creators": ["Organization: Anchore, Inc", "Tool: syft-1.14.2"],
+    "created": "2026-08-20T09:35:02Z"
+  },
+  "packages": [
+    {
+      "name": "log4j-core",
+      "SPDXID": "SPDXRef-Package-java-archive-log4j-core-6b1f0a",
+      "versionInfo": "2.17.1",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "Apache-2.0",
+      "copyrightText": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-core@2.17.1"
+        }
+      ]
+    },
+    {
+      "name": "zlib",
+      "SPDXID": "SPDXRef-Package-apk-zlib-2c9d31",
+      "versionInfo": "1.3.1-r0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "licenseDeclared": "Zlib",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:apk/alpine/zlib@1.3.1-r0?arch=x86_64"
+        }
+      ]
+    },
+    {
+      "name": "internal-widget",
+      "SPDXID": "SPDXRef-Package-internal-widget",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NONE"
+    }
+  ],
+  "relationships": [
+    { "spdxElementId": "SPDXRef-DOCUMENT", "relatedSpdxElement": "SPDXRef-Package-apk-zlib-2c9d31", "relationshipType": "DESCRIBES" }
+  ]
+}

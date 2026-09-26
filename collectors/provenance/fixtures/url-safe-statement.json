@@ -1,0 +1,16 @@
+{
+ "_type": "https://in-toto.io/Statement/v1",
+ "predicateType": "https://spdx.dev/Document",
+ "subject": [
+  {
+   "name": "pkg:deb/debian/openssl@3.0.13-1?arch=amd64",
+   "digest": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   }
+  }
+ ],
+ "predicate": {
+  "name": "buildnote-enterprise",
+  "spdxVersion": "SPDX-2.3"
+ }
+}

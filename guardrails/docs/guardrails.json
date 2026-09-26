@@ -1,0 +1,179 @@
+{
+  "version": "v1",
+  "category": "docs",
+  "icon": "icon.svg",
+  "guardrails": {
+    "readme": {
+      "name": "Repository has a README",
+      "description": "The repository has a README that says more than just its title.",
+      "severity": "warning",
+      "remediation": "Add a `README.md` at the repository root explaining what the project is, how to build it and how to run it. A stub that only repeats the repository name is worse than no README, because it looks like the question has been answered.",
+      "check": {
+        "run": "readme.py",
+        "timeoutSeconds": 30
+      },
+      "collect": [
+        "files"
+      ],
+      "inputs": {
+        "path": {
+          "default": "README.md",
+          "description": "Path to the README, relative to the directory the CLI runs in."
+        },
+        "minLines": {
+          "default": "10",
+          "description": "How many non-blank lines the README needs before it counts as written."
+        }
+      },
+      "maxViolations": 0
+    },
+    "security-policy": {
+      "name": "Repository documents how to report a vulnerability",
+      "description": "The repository has a `SECURITY.md` saying where to report a security problem.",
+      "severity": "warning",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add a `SECURITY.md` at the repository root, or under `.github/`, saying where to report a vulnerability and how quickly a reporter can expect a response:\n\n```markdown\n# Security\n\nReport a vulnerability to security@company.com. We acknowledge within two working days.\n```\n\nGitHub links this file from the repository's Security tab and from the advisory form. Without it, a researcher who finds something has nowhere to send it except a public issue, and that is a disclosure, not a report.",
+      "check": {
+        "run": "security-policy.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "path": {
+          "default": "SECURITY.md",
+          "description": "Path to the security policy, relative to the directory the CLI runs in."
+        },
+        "minLines": {
+          "default": "3",
+          "description": "How many non-blank lines it needs before it counts as written."
+        },
+        "contact": {
+          "default": "true",
+          "description": "Whether the policy must include a way to get in touch, either an email address or a URL."
+        }
+      },
+      "maxViolations": 0
+    },
+    "license-present": {
+      "name": "Repository states its licence",
+      "description": "The repository has a licence file, so what people may do with the code is written down, not assumed.",
+      "severity": "warning",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add a `LICENSE` at the repository root. For a private repository, state the terms explicitly instead of leaving the file out:\n\n```\nCopyright (c) 2026 Company Ltd. All rights reserved.\nThis source is confidential and may not be copied or distributed.\n```\n\nA missing licence doesn't make the code free to use. Without one, nobody except the copyright holder has the right to use the code, which is rarely what a repository with contributors intends. It is also the first thing an acquirer's due diligence asks for.",
+      "check": {
+        "run": "license-present.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "paths": {
+          "default": "LICENSE,LICENSE.md,LICENSE.txt,COPYING",
+          "description": "Comma separated paths, any one of which satisfies the guardrail."
+        }
+      },
+      "maxViolations": 0
+    },
+    "changelog": {
+      "name": "Repository keeps a changelog",
+      "description": "The repository has a changelog, so what changed between two releases is written down instead of pieced together from commits.",
+      "severity": "info",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add a `CHANGELOG.md` at the repository root and update it with each release:\n\n```markdown\n# Changelog\n\n## 1.4.0\n\n### Added\n- Token rotation on the public API.\n\n### Fixed\n- Expired sessions were accepted for one further request.\n```\n\nSee [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The commit log is not a changelog: commits are written for the person making the change, while the changelog is written for the people using the result.",
+      "check": {
+        "run": "changelog.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "path": {
+          "default": "CHANGELOG.md",
+          "description": "Path to the changelog, relative to the directory the CLI runs in."
+        },
+        "minLines": {
+          "default": "5",
+          "description": "How many non-blank lines it needs before it counts as kept."
+        }
+      },
+      "maxViolations": 0
+    },
+    "contributing": {
+      "name": "Repository says how to contribute to it",
+      "description": "The repository has a `CONTRIBUTING.md` explaining how a change is proposed, built and reviewed.",
+      "severity": "info",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add a `CONTRIBUTING.md` at the repository root, or under `.github/`, covering how to build the project, how to run its tests, and what a pull request should include:\n\n```markdown\n# Contributing\n\n1. `./gradlew check` must pass.\n2. Commits follow Conventional Commits.\n3. One reviewer from the owning team approves.\n```\n\nThe forge links this file from the pull request form. Without it, every contributor learns the rules by having their first attempt rejected in review.",
+      "check": {
+        "run": "contributing.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "path": {
+          "default": "CONTRIBUTING.md",
+          "description": "Path to the contribution guide, relative to the directory the CLI runs in."
+        },
+        "minLines": {
+          "default": "5",
+          "description": "How many non-blank lines it needs before it counts as written."
+        }
+      },
+      "maxViolations": 0
+    },
+    "code-of-conduct": {
+      "name": "Repository publishes a code of conduct",
+      "description": "The repository has a `CODE_OF_CONDUCT.md`, so the standard contributors are held to, and who enforces it, is written down.",
+      "severity": "info",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add a `CODE_OF_CONDUCT.md` at the repository root, or under `.github/`. Adopting an existing code of conduct is normal and just as good as writing your own. The [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) is the usual choice, and the only part you need to fill in yourself is the address reports go to.\n\nAn unwritten standard is enforced inconsistently and can't be appealed, which hurts the person reporting more than the person reported.",
+      "check": {
+        "run": "code-of-conduct.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "path": {
+          "default": "CODE_OF_CONDUCT.md",
+          "description": "Path to the code of conduct, relative to the directory the CLI runs in."
+        },
+        "minLines": {
+          "default": "5",
+          "description": "How many non-blank lines it needs before it counts as published."
+        }
+      },
+      "maxViolations": 0
+    },
+    "agent-instructions": {
+      "name": "Repository instructs the coding agents working in it",
+      "description": "The repository has an instruction file for coding agents, long enough to say something and short enough to be read in full.",
+      "severity": "info",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Add an `AGENTS.md` at the repository root explaining how the project is built, how it is tested, and the conventions a change must follow:\n\n```markdown\n# AGENTS.md\n\n## Commands\n`./gradlew check` builds and tests every module.\n\n## Conventions\nCommits follow Conventional Commits. Write no comments.\n```\n\nSee [agents.md](https://agents.md). Without instructions, an agent rediscovers your conventions from the code in every session and gets the edge cases wrong. An instruction file nobody trims grows past the point where the model pays attention to all of it, which fails the same way while looking like the job is done.",
+      "check": {
+        "run": "agent-instructions.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "paths": {
+          "default": "AGENTS.md,CLAUDE.md,.github/copilot-instructions.md",
+          "description": "Comma separated paths, any one of which satisfies the guardrail. The first one present is the one measured."
+        },
+        "minLines": {
+          "default": "10",
+          "description": "How many non-blank lines it needs before it counts as written."
+        },
+        "maxLines": {
+          "default": "500",
+          "description": "How many non-blank lines it may have before it is too long for the model to pay attention to all of it. `0` means no limit."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

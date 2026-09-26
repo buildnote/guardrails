@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(widget VERSION 1.2.3 LANGUAGES CXX)
+
+find_package(fmt CONFIG REQUIRED)
+
+add_executable(widget src/main.cpp)
+target_compile_features(widget PRIVATE cxx_std_20)

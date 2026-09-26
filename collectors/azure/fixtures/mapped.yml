@@ -1,0 +1,9 @@
+variables:
+  region: eu-central-1
+  fleet: docker
+jobs:
+  - job: build
+    pool:
+      name: on-prem
+    steps:
+      - script: make

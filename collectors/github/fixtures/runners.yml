@@ -1,0 +1,20 @@
+name: Runners
+on: push
+jobs:
+  hosted:
+    runs-on: ubuntu-latest
+    steps:
+      - run: make
+  fleet:
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 5
+    steps:
+      - run: make
+  custom:
+    runs-on: big-box
+    steps:
+      - run: make
+  chosen:
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: make

@@ -1,0 +1,7 @@
+{
+  "name": "@company/core",
+  "version": "1.2.3",
+  "dependencies": {
+    "zod": "3.23.8"
+  }
+}

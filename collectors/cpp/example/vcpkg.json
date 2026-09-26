@@ -1,0 +1,15 @@
+{
+  "name": "widget",
+  "version": "1.2.3",
+  "builtin-baseline": "6f3a1c2d9b8e4f7a0c5d2e1b3a4f5c6d7e8f9a0b",
+  "dependencies": [
+    "fmt",
+    { "name": "spdlog", "version>=": "1.13.0" }
+  ],
+  "features": {
+    "test": {
+      "description": "Unit tests",
+      "dependencies": ["catch2"]
+    }
+  }
+}

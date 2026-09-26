@@ -1,0 +1,68 @@
+@Library('company-pipeline@1.4.2') _
+
+pipeline {
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-21'
+        }
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    triggers {
+        cron('H 4 * * 1-5')
+    }
+
+    tools {
+        jdk 'temurin-21'
+    }
+
+    environment {
+        GRADLE_OPTS = '-Dorg.gradle.daemon=false'
+        SONAR_TOKEN = credentials('sonar-token')
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                checkout scm
+                sh './gradlew --no-daemon build'
+            }
+        }
+
+        stage('Verify') {
+            parallel {
+                stage('Test') {
+                    steps {
+                        sh './gradlew --no-daemon test'
+                    }
+                }
+
+                stage('Lint') {
+                    options {
+                        timeout(time: 5, unit: 'MINUTES')
+                    }
+                    steps {
+                        sh './gradlew --no-daemon detekt'
+                    }
+                }
+            }
+        }
+
+        stage('Publish') {
+            when {
+                branch 'main'
+            }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'registry', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
+                    sh './gradlew --no-daemon publish'
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,7 @@
+* @company/platform
+
+*.md @company/docs docs@company.example
+
+/service/ @company/service-team
+
+/service/build/

@@ -1,0 +1,45 @@
+{
+  "id": "scala",
+  "version": "v1",
+  "name": "Scala build",
+  "description": "The sbt build in the project directory: the Scala and sbt versions it pins, every subproject the reader saw, the library dependencies each build file names with their configurations, and the plugins the build itself runs. `build.sbt` is Scala rather than a declaration, so what it declares indirectly is not seen and `scanned` says so.",
+  "icon": "icon.svg",
+  "run": "scala.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in, always `build.sbt`.",
+    "sources": "Every build file that was read, in the order they were read.",
+    "scanned": "Every build file that is Scala rather than a declaration and was read by pattern. A dependency built by a function, added inside a condition or held in a variable is not seen, so `dependencies` read from one of these is a minimum, not the complete list.",
+    "declared": "The Scala version the build declares, or `null` when the reader could not see one.",
+    "declared.version": "Version exactly as written, such as `3.4.1`.",
+    "declared.source": "Build file declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether it names one exact version. sbt takes a literal version rather than a range, so this is `true` wherever a version was read and `false` only when it is an unresolved reference.",
+    "sbt": "The sbt version `project/build.properties` pins, such as `1.9.9`, or `null` when the checkout pins none and whatever launcher the runner has decides.",
+    "projects": "The root build, followed by every subproject the reader saw declared with `project in file(...)`.",
+    "projects[].path": "Directory of the subproject, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "The build file declaring it, from the directory the CLI runs in.",
+    "projects[].name": "Name the `lazy val` binds it to, or `null` for the root.",
+    "dependencies": "What the build files declare, split by whether the build asks for it itself.",
+    "dependencies.direct": "Every `libraryDependencies` entry the reader saw, in the order they appear.",
+    "dependencies.direct[].name": "Coordinates as `group:artifact`, such as `org.typelevel:cats-effect`. An artifact declared with `%%` keeps its base name, without the Scala binary version sbt appends.",
+    "dependencies.direct[].version": "Revision exactly as written, such as `3.5.4`, or `null` when it is an unresolved reference rather than a literal.",
+    "dependencies.direct[].scopes": "The configuration the entry names, such as `Test` or `Provided`, or `default` when it names none and the dependency is on the compile classpath.",
+    "dependencies.direct[].source": "Build file declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the revision is a literal version rather than a reference or a `latest.integration` style moving revision.",
+    "dependencies.direct[].crossVersion": "Whether the entry uses `%%`, which makes sbt append the Scala binary version to the artifact name.",
+    "dependencies.transitive": "Always empty. sbt resolves at build time and commits nothing by default: `lockfiles` says whether a locking plugin wrote one.",
+    "plugins": "Every sbt plugin `project/plugins.sbt` adds, as `group:artifact`, which is code the build runs with the build's own privileges.",
+    "lockfiles": "Every dependency lock file committed, from the directory the CLI runs in. sbt writes none by default, so an empty list is the usual answer rather than a finding on its own.",
+    "unparsed": "Every build file the reader could not open, so a guardrail can tell a build that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that build file, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

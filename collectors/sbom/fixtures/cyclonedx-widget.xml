@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" version="1">
+  <components>
+    <component type="library">
+      <name>guava</name>
+      <version>33.2.0-jre</version>
+      <purl>pkg:maven/com.google.guava/guava@33.2.0-jre</purl>
+      <licenses><license><id>Apache-2.0</id></license></licenses>
+    </component>
+  </components>
+</bom>

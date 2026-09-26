@@ -1,0 +1,120 @@
+{
+  "version": "v1",
+  "category": "terraform",
+  "icon": "icon.svg",
+  "collect": [
+    "terraform"
+  ],
+  "guardrails": {
+    "remote-state": {
+      "name": "Terraform state is kept in a remote backend",
+      "description": "Every live Terraform root stores its state in a remote backend, and no state file is left in the checkout.",
+      "severity": "error",
+      "remediation": "Store state in a shared backend with locking and encryption:\n\n```hcl\nterraform {\n  backend \"s3\" {\n    bucket       = \"company-terraform-state\"\n    key          = \"live/network.tfstate\"\n    region       = \"eu-west-1\"\n    encrypt      = true\n    use_lockfile = true\n  }\n}\n```\n\nThen keep state files out of the repository:\n\n```bash\nprintf '*.tfstate\\n*.tfstate.backup\\n' >> .gitignore\ngit rm --cached terraform.tfstate\n```\n\nLocal state is one lost laptop away from being gone, and two concurrent applies overwrite each other with nothing to stop them. A state file in the repository is worse than lost state: it contains every attribute of every resource, including the ones marked `sensitive`, and anyone who can read the repository can read it.",
+      "check": {
+        "run": "remote-state.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "checkStateFiles": {
+          "default": "true",
+          "description": "Whether a `.tfstate` or `.tfstate.backup` file in the working tree is a violation. The collector reads the working tree, not the git index, so a developer who has run `terraform apply` locally has one even though nobody committed it. In CI the checkout matches the repository, so the two are the same."
+        },
+        "modulePaths": {
+          "default": "modules/*,*/modules/*",
+          "description": "Comma separated globs naming directories that hold reusable modules rather than live roots. A module declares no backend and pins nothing, so it is not judged here. A directory another root takes on with a local `source` is recognised as a module whether or not it matches."
+        }
+      },
+      "maxViolations": 0
+    },
+    "providers-pinned": {
+      "name": "Terraform providers are pinned",
+      "description": "Every provider a live Terraform root requires is pinned to one exact version, and the lock file that resolves them is committed.",
+      "severity": "error",
+      "remediation": "Pin each provider to an exact version, and commit the lock file `terraform init` writes:\n\n```hcl\nterraform {\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"6.4.0\"\n    }\n  }\n}\n```\n\n```bash\nterraform init\ngit add .terraform.lock.hcl\n```\n\nWith `~> 6.0`, a runner can resolve a version nobody reviewed, so the apply can run against a provider the approved plan never saw. The lock file records checksums as well as versions, so a swapped provider shows up as a mismatch instead of looking like an ordinary upgrade.\n\nReusable modules are the exception and declare a range instead, because the root that calls them does the pinning. List your module directories in `modulePaths` and they are skipped.",
+      "check": {
+        "run": "providers-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "requireLockfile": {
+          "default": "true",
+          "description": "Whether a root that requires providers must commit a `.terraform.lock.hcl`. A root that requires no providers is never asked for one."
+        },
+        "modulePaths": {
+          "default": "modules/*,*/modules/*",
+          "description": "Comma separated globs naming directories that hold reusable modules rather than live roots. A module declares no backend and pins nothing, so it is not judged here. A directory another root takes on with a local `source` is recognised as a module whether or not it matches."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-plaintext-secrets": {
+      "name": "Terraform variables holding secrets are marked sensitive",
+      "description": "Every Terraform variable named like a credential declares `sensitive = true`.",
+      "severity": "error",
+      "remediation": "Mark the variable as sensitive, and don't give it a default:\n\n```hcl\nvariable \"db_password\" {\n  type      = string\n  sensitive = true\n}\n```\n\nPass the value in from the secret store your pipeline already uses, as an environment variable, instead of from a `.tfvars` file anyone can commit:\n\n```bash\nTF_VAR_db_password=\"$(aws ssm get-parameter --name /company/db/password --with-decryption --query Parameter.Value --output text)\" terraform apply\n```\n\n`sensitive = true` redacts the value in plans and CLI output. It doesn't encrypt it in state, so the backend still needs to encrypt. Plans are the exposure people miss: a pull request comment that quotes a plan publishes whatever the plan printed.",
+      "check": {
+        "run": "no-plaintext-secrets.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "patterns": {
+          "default": "*SECRET*,*TOKEN*,*PASSWORD*,*KEY*,*CREDENTIAL*",
+          "description": "Comma separated glob patterns, matched case-insensitively against the name of every `variable` block. Only names are checked: the collector never collects defaults, because a default can be the credential itself."
+        }
+      },
+      "maxViolations": 0
+    },
+    "state-locking": {
+      "name": "Terraform state is locked",
+      "description": "Every live Terraform root declares state locking, so two applies cannot write the same state at once.",
+      "severity": "error",
+      "remediation": "Enable locking on the backend. Since Terraform 1.10, S3 can hold the lock itself:\n\n```hcl\nterraform {\n  backend \"s3\" {\n    bucket       = \"company-terraform-state\"\n    key          = \"live/main/terraform.tfstate\"\n    region       = \"eu-west-1\"\n    use_lockfile = true\n  }\n}\n```\n\nOlder configurations use a `dynamodb_table` instead, and both are recognised. Without a lock, two overlapping applies each write a state file that describes only their own changes, and the resources the other one created become unmanaged and invisible.",
+      "check": {
+        "run": "state-locking.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "modulePaths": {
+          "default": "modules/*,*/modules/*",
+          "description": "Comma separated globs naming directories that hold reusable modules rather than live roots. A module declares no backend and pins nothing, so it is not judged here. A directory another root takes on with a local `source` is recognised as a module whether or not it matches."
+        }
+      },
+      "maxViolations": 0
+    },
+    "state-encrypted": {
+      "name": "Terraform state is encrypted at rest",
+      "description": "Every live Terraform root declares an encrypted backend, so its state isn't stored in the clear in its bucket.",
+      "severity": "error",
+      "remediation": "Enable encryption on the backend:\n\n```hcl\nterraform {\n  backend \"s3\" {\n    bucket     = \"company-terraform-state\"\n    key        = \"live/main/terraform.tfstate\"\n    region     = \"eu-west-1\"\n    encrypt    = true\n    kms_key_id = \"arn:aws:kms:eu-west-1:111122223333:key/company-terraform\"\n  }\n}\n```\n\nState contains every attribute of every resource, including the database password the provider generated and the private keys it holds. An unencrypted state file leaves all of that in object storage in the clear.",
+      "check": {
+        "run": "state-encrypted.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "modulePaths": {
+          "default": "modules/*,*/modules/*",
+          "description": "Comma separated globs naming directories that hold reusable modules rather than live roots. A module declares no backend and pins nothing, so it is not judged here. A directory another root takes on with a local `source` is recognised as a module whether or not it matches."
+        }
+      },
+      "maxViolations": 0
+    },
+    "modules-pinned": {
+      "name": "Terraform modules are pinned",
+      "description": "Every module a Terraform root pulls from a registry or a git URL names a version, so the same commit always resolves to the same module code.",
+      "severity": "error",
+      "remediation": "Pin the modules named in the violations. For a registry source, pin with `version`:\n\n```hcl\nmodule \"vpc\" {\n  source  = \"terraform-aws-modules/vpc/aws\"\n  version = \"5.8.1\"\n}\n```\n\nFor a git source, pin with a ref in the URL. A tag isn't enough, because a tag can move:\n\n```hcl\nmodule \"vpc\" {\n  source = \"git::https://github.com/company/terraform-vpc.git?ref=6f3a1c2d9b8e4f7a0c5d2e1b3a4f5c6d7e8f9a0b\"\n}\n```\n\nWith an unpinned module, the plan you reviewed and the plan that was applied can come from different code. A module in this repository, referenced with a relative `source`, is already pinned by the commit and isn't checked.",
+      "check": {
+        "run": "modules-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowMovableRefs": {
+          "default": "false",
+          "description": "Whether a git source pinned to a tag or branch instead of a commit SHA counts as pinned. `false` requires a 40 character SHA, the only ref nobody can move."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

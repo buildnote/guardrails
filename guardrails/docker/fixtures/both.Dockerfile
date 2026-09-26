@@ -1,0 +1,5 @@
+
+FROM node:20-alpine
+ARG NPM_TOKEN
+ENV NPM_TOKEN=$NPM_TOKEN
+RUN npm ci

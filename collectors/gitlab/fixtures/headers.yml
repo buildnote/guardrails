@@ -1,0 +1,9 @@
+spec:
+  inputs:
+    stage:
+      default: test
+types:
+  - build
+build:
+  script:
+    - make

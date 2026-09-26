@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "category": "java",
+  "icon": "icon.svg",
+  "collect": [
+    "java"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Java version is declared",
+      "description": "The build declares the Java release it compiles for, and that release is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the release where the build already configures itself:\n\n```kotlin\njava {\n    toolchain {\n        languageVersion.set(JavaLanguageVersion.of(21))\n    }\n}\n```\n\nIn Maven, set `<maven.compiler.release>21</maven.compiler.release>`. With nothing declared, the build compiles for whatever release the runner's JDK defaults to. An API call from a newer release then compiles on the machine where it was added and breaks on an agent with an older JDK.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "17",
+          "description": "Oldest Java release accepted, as a release number such as `17`. A declared release below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "toolchain-declared": {
+      "name": "Java toolchain is declared",
+      "description": "The build selects the JDK it compiles with through a Java toolchain, instead of using whichever JDK launched it.",
+      "severity": "warning",
+      "remediation": "Let the build choose its own JDK instead of using the one that launched it:\n\n```kotlin\njava {\n    toolchain {\n        languageVersion.set(JavaLanguageVersion.of(21))\n    }\n}\n```\n\nA toolchain provisions the JDK it names and fails the build if it can't find one. Without it, the build compiles against whichever JDK the runner starts it with, so the same commit produces different bytecode on a machine with a different JDK installed.",
+      "check": {
+        "run": "toolchain-declared.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "version-reproducible": {
+      "name": "Java version is reproducible",
+      "description": "The Java release is declared through a mechanism that provisions the JDK, not one that asks the running JDK to target an older release.",
+      "severity": "warning",
+      "remediation": "Replace `sourceCompatibility`, `targetCompatibility`, `options.release` or `maven.compiler.release` with a toolchain. A toolchain selects the JDK itself, instead of asking the running one to target an older release:\n\n```kotlin\njava {\n    toolchain {\n        languageVersion.set(JavaLanguageVersion.of(21))\n    }\n}\n```\n\nWith `sourceCompatibility = JavaVersion.VERSION_17`, the build still compiles against the class library of whichever JDK is on the runner. A method added after Java 17 resolves at compile time, then throws `NoSuchMethodError` on the Java 17 runtime the artifact was built for.",
+      "check": {
+        "run": "version-reproducible.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,3 @@
+[project]
+name = "widget-core"
+dependencies = ["anyio>=4.3"]

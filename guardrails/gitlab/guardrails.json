@@ -1,0 +1,121 @@
+{
+  "version": "v1",
+  "category": "gitlab",
+  "icon": "icon.svg",
+  "collect": [
+    "gitlab"
+  ],
+  "inputs": {
+    "pipelines": {
+      "default": ".gitlab-ci.yml,.gitlab-ci.yaml",
+      "description": "Comma separated globs naming the GitLab CI files to read."
+    }
+  },
+  "guardrails": {
+    "job-timeout-set": {
+      "name": "Pipeline jobs declare a timeout",
+      "description": "Every job declares how long it may run, so a hung job is cut off rather than holding a runner until the project's own limit.",
+      "severity": "info",
+      "remediation": "Declare a timeout on each job:\n\n```yaml\nbuild:\n  timeout: 15 minutes\n  script:\n    - ./gradlew check\n```\n\nA job without one takes the project's timeout. That value lives in GitLab's settings, not in this repository, so you can't tell what it is from the pipeline. A hung job holds its runner for the whole of that time. On your own runners that blocks a queue nobody can clear; on GitLab's shared runners it uses up your CI minutes quota.",
+      "check": {
+        "run": "job-timeout-set.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxMinutes": {
+          "default": "60",
+          "description": "Longest timeout accepted. A job that declares more than this is treated as having no timeout."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-present": {
+      "name": "Project declares its code owners",
+      "description": "The project has a `CODEOWNERS` file in one of the three places GitLab reads it from, and at least one section of it declares a rule, so every change has someone to review it.",
+      "severity": "warning",
+      "remediation": "Add a `CODEOWNERS` file in one of the three places GitLab looks: the project root, `.gitlab/` or `docs/`.\n\n```\n* @company/platform\n\n[Backend][2] @company/backend\n/api/\n```\n\nWithout one, GitLab has no approver it can require on a merge request, so review falls to whoever happens to notice. A section header on its own is not enough: a section with no rules under it owns nothing, and GitLab shows no owner for any path.",
+      "check": {
+        "run": "codeowners-present.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-parses": {
+      "name": "Every CODEOWNERS line is a rule or a section header",
+      "description": "Every line of `CODEOWNERS` that isn't a comment is either a section header or a rule, so no ownership is silently lost to a line GitLab ignores.",
+      "severity": "error",
+      "remediation": "Fix the lines named in the violations. A section header is a name in brackets, optionally prefixed with `^` to make the section optional, followed by the number of approvals it requires and its default owners:\n\n```\n^[Security review][2] @company/security\n/terraform/\n```\n\nA rule is a pattern, whitespace, then the owners. An owner is a user (`@dana`), a group (`@company/backend`), a subgroup (`@company/security/appsec`) or an email address. GitLab silently ignores a line that is none of these, so the paths it was meant to cover fall back to an earlier rule in the same section, or to nobody.",
+      "check": {
+        "run": "codeowners-parses.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-catch-all": {
+      "name": "A required section covers everything",
+      "description": "A section that requires approval declares a rule matching every path, so a file nobody thought about still has an owner who must approve it.",
+      "severity": "warning",
+      "remediation": "Make a catch-all the first rule of a required section, then narrow ownership below it:\n\n```\n* @company/platform\n\n[Backend][2] @company/backend\n/api/\n```\n\nGitLab resolves ownership separately for each section, so a catch-all only covers the section it sits in. A file that no section names has no owner, and you won't notice the gap until a merge request touches it.\n\nA catch-all in an optional section doesn't close the gap. Optional sections are written `^[Name]`. Their owners are shown on the merge request, but their approval is never required, so the change can merge without anyone having looked at it.",
+      "check": {
+        "run": "codeowners-catch-all.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "patterns": {
+          "default": "*,**,/*",
+          "description": "Comma separated patterns, any one of which counts as matching every path."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-no-unowned-rules": {
+      "name": "No CODEOWNERS rule is left without an owner",
+      "description": "No rule in `CODEOWNERS` ends up with no owners, counting the default owners it inherits from its section header, so no section claims a path without naming someone for it.",
+      "severity": "error",
+      "remediation": "Give the rules named in the violations an owner, move them under a section that declares default owners, or delete them:\n\n```\n[Backend][2] @company/backend\n/api/\n/vendor/ @company/platform\n```\n\nA rule under a section with default owners doesn't need owners of its own, because it inherits the header's. A rule with neither is the problem: it matches paths in its section but owns none of them, so those paths look covered while GitLab asks nobody for approval. Because ownership resolves per section and the last matching rule wins within it, such a rule also overrides any broader rule above it in the same section.",
+      "check": {
+        "run": "codeowners-no-unowned-rules.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-owners-per-rule": {
+      "name": "Each CODEOWNERS rule names a workable number of owners",
+      "description": "Every rule in `CODEOWNERS` ends up with between the minimum and maximum number of owners, counting the default owners it inherits from its section header, so review depends neither on a single person nor on everyone.",
+      "severity": "warning",
+      "remediation": "Adjust the rules named in the violations, or the section header they inherit their owners from. A single owner is a single point of failure: while they are on leave, nobody can approve changes to the path. A long list fails the other way, because GitLab asks all of them and each one assumes someone else will pick it up.\n\nA group owner counts as one:\n\n```\n[Backend][2] @company/backend\n/api/\n```\n\nThis is usually the right answer. Membership then lives in the group instead of in this file, and the section's approval count sets how many members have to approve.",
+      "check": {
+        "run": "codeowners-owners-per-rule.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minOwners": {
+          "default": "1",
+          "description": "Fewest owners a rule may end up with. A rule that ends up with none is covered by `gitlab/codeowners-no-unowned-rules`."
+        },
+        "maxOwners": {
+          "default": "5",
+          "description": "Most owners a rule may end up with. `0` means no ceiling."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-team-owned": {
+      "name": "CODEOWNERS rules name groups",
+      "description": "Every rule in `CODEOWNERS` ends up owned by at least one GitLab group, so ownership survives changes in who is on the team.",
+      "severity": "warning",
+      "remediation": "Replace the individuals named in the violations with their group, either on the rule or on the section header above it:\n\n```\n-/api/ @dana @sam\n+/api/ @company/backend\n```\n\nA rule that names individuals goes stale as soon as one of them changes team, and nothing warns you: GitLab keeps asking for approval from someone who no longer works on that code. A group owner moves membership out of this file, where changes are reviewed, and into the group, where it is administered. A subgroup such as `@company/security/appsec` counts as a group.",
+      "check": {
+        "run": "codeowners-team-owned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowIndividuals": {
+          "default": "true",
+          "description": "Whether a rule that ends up with individuals alongside a group is accepted. A group is required either way; this only decides whether the individuals next to it are reported as a finding of their own."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<test-results name="mock" total="1">
+          <test-suite name="fixture">
+            <results>
+              <test-case name="NUnit.Tests.MockTestFixture.IsEven(i: 2.3)" executed="True" success="False" time="0.001"/>
+            </results>
+          </test-suite>
+        </test-results>

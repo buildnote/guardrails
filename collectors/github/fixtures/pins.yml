@@ -1,0 +1,11 @@
+name: Actions
+on: push
+jobs:
+  pins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@%s
+      - uses: actions/setup-node@v4.0.2
+      - uses: some-org/some-action@main
+      - uses: ./.github/actions/setup
+      - uses: docker://alpine:3.19

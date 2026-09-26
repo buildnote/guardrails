@@ -1,0 +1,17 @@
+# Ownership for the widget project.
+
+* @company/platform
+
+[Backend][2] @company/backend
+/api/
+/service/ @company/service-team
+
+[Documentation] @company/docs docs@company.example
+*.md  # documentation, wherever it lives
+/docs/
+
+^[Security review] @company/security/appsec
+/terraform/
+
+[Generated]
+/service/generated/

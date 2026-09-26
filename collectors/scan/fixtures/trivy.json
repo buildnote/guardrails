@@ -1,0 +1,86 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-08-20T09:14:02.117384Z",
+  "ArtifactName": ".",
+  "ArtifactType": "filesystem",
+  "Metadata": { "ImageConfig": { "architecture": "", "os": "" } },
+  "Results": [
+    {
+      "Target": "buildnote-app/yarn.lock",
+      "Class": "lang-pkgs",
+      "Type": "yarn",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2024-4068",
+          "PkgID": "braces@3.0.2",
+          "PkgName": "braces",
+          "PkgIdentifier": { "PURL": "pkg:npm/braces@3.0.2", "UID": "3f9d1ba0" },
+          "InstalledVersion": "3.0.2",
+          "FixedVersion": "3.0.3",
+          "Status": "fixed",
+          "Severity": "HIGH",
+          "Title": "braces: fails to limit the number of characters it can handle",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-4068",
+          "CweIDs": ["CWE-1050"]
+        },
+        {
+          "VulnerabilityID": "GHSA-3xgq-45jj-v275",
+          "PkgName": "cross-spawn",
+          "InstalledVersion": "7.0.3",
+          "FixedVersion": "7.0.5",
+          "Severity": "MEDIUM",
+          "Title": "cross-spawn: regular expression denial of service"
+        }
+      ]
+    },
+    {
+      "Target": "alpine:3.18 (alpine 3.18.4)",
+      "Class": "os-pkgs",
+      "Type": "alpine",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2023-5363",
+          "PkgName": "libcrypto3",
+          "InstalledVersion": "3.1.3-r0",
+          "FixedVersion": "3.1.4-r0",
+          "Severity": "CRITICAL",
+          "Title": "openssl: Incorrect cipher key and IV length processing"
+        }
+      ]
+    },
+    {
+      "Target": "Dockerfile",
+      "Class": "config",
+      "Type": "dockerfile",
+      "MisconfSummary": { "Successes": 22, "Failures": 1, "Exceptions": 0 },
+      "Misconfigurations": [
+        {
+          "Type": "Dockerfile Security Check",
+          "ID": "DS002",
+          "AVDID": "AVD-DS-0002",
+          "Title": "Image user should not be 'root'",
+          "Description": "Running containers with 'root' user can lead to a container escape situation.",
+          "Message": "Specify at least 1 USER command in Dockerfile with non-root user as argument",
+          "Severity": "HIGH",
+          "Status": "FAIL",
+          "CauseMetadata": { "Provider": "Dockerfile", "Service": "general", "StartLine": 1, "EndLine": 1 }
+        }
+      ]
+    },
+    {
+      "Target": "deploy/bootstrap.sh",
+      "Class": "secret",
+      "Secrets": [
+        {
+          "RuleID": "aws-access-key-id",
+          "Category": "AWS",
+          "Severity": "CRITICAL",
+          "Title": "AWS Access Key ID",
+          "StartLine": 14,
+          "EndLine": 14,
+          "Match": "AWS_ACCESS_KEY_ID=****************"
+        }
+      ]
+    }
+  ]
+}

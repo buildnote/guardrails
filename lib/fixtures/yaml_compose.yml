@@ -1,0 +1,24 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: buildnote
+      CLICKHOUSE_PASSWORD: ''
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 5s
+    volumes:
+      - ./data:/var/lib/clickhouse
+    command: >
+      --config-file=/etc/clickhouse-server/config.xml
+      --log-level=warning
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+volumes:
+  data: {}

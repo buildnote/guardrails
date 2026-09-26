@@ -1,0 +1,135 @@
+{
+  "version": "v1",
+  "category": "supply-chain",
+  "icon": "icon.svg",
+  "guardrails": {
+    "sbom-present": {
+      "name": "The build produced a software bill of materials",
+      "description": "An SBOM was produced for this build, so the components that went into the artifact are recorded at build time instead of reconstructed later.",
+      "severity": "error",
+      "collect": [
+        "sbom"
+      ],
+      "remediation": "Generate an SBOM in the pipeline and leave it in the workspace before `buildnote guardrails` runs:\n\n```bash\nsyft dir:. -o cyclonedx-json=bom.json\n```\n\nGradle and Maven have plugins that generate one from the resolved dependency graph, which is more accurate than scanning the file tree. A missing SBOM is the violation. An SBOM answers \"which releases contain package X at version Y\", a question you get asked the day the next Log4Shell lands, when reconstructing the answer is far too slow.",
+      "check": {
+        "run": "sbom-present.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minComponents": {
+          "default": "1",
+          "description": "Fewest components an SBOM must list to count. A document that lists none is not an inventory."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-critical-vulnerabilities": {
+      "name": "No critical vulnerabilities in dependencies",
+      "description": "No dependency of the build has an open finding at or above the severity the team gates on.",
+      "severity": "error",
+      "collect": [
+        "scan"
+      ],
+      "remediation": "Upgrade the dependency to the version the scanner reports as fixed. If no fix exists, record a risk acceptance with an owner and an expiry date where the exception register can see it, instead of raising the threshold.\n\nRun the scanner in the pipeline and leave its report in the workspace:\n\n```bash\ntrivy fs --format json --output trivy.json .\n```",
+      "check": {
+        "run": "no-critical-vulnerabilities.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "severity": {
+          "default": "critical",
+          "description": "Lowest severity that violates: `critical`, `high`, `medium`, `low` or `info`."
+        },
+        "ignore": {
+          "default": "",
+          "description": "Comma separated vulnerability identifiers to leave out, for findings already accepted. Someone should be able to explain each one."
+        }
+      },
+      "maxViolations": 0
+    },
+    "components-licensed": {
+      "name": "The bill of materials names a licence for what it lists",
+      "description": "Enough of the components in the bill of materials name a licence for the inventory to tell you what the artifact may be distributed under.",
+      "severity": "warning",
+      "collect": [
+        "sbom"
+      ],
+      "remediation": "Generate the bill of materials from the resolved dependency graph, not from the manifest, so the generator has the metadata it needs to read licences:\n\n```bash\nsyft dir:. -o cyclonedx-json=bom.json\n```\n\nA component with no licence listed isn't unlicensed; nobody looked its licence up. This matters the first time someone asks whether the artifact can ship to a customer, because that question has to be answered for every component, and \"unknown\" isn't an acceptable answer.",
+      "check": {
+        "run": "components-licensed.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minPercent": {
+          "default": "95",
+          "description": "Percentage of components that must name at least one licence."
+        }
+      },
+      "maxViolations": 0
+    },
+    "disallowed-licenses": {
+      "name": "No component carries a licence the team refuses",
+      "description": "No component in the bill of materials uses a licence the team has decided it won't ship.",
+      "severity": "error",
+      "collect": [
+        "sbom"
+      ],
+      "remediation": "Replace the components named in the violations, or make a deliberate exception by removing that licence from the list this guardrail is configured with.\n\nA copyleft licence in a distributed artifact is a legal obligation, not a preference: some require you to offer the source of the whole work to anyone who receives the binary. Finding one at release time is expensive; finding it in the pull request that added it is not.",
+      "check": {
+        "run": "disallowed-licenses.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "licenses": {
+          "default": "AGPL-1.0,AGPL-3.0,SSPL-1.0,BUSL-1.1,CC-BY-NC,Commons-Clause,Elastic-2.0",
+          "description": "Comma separated SPDX identifiers that are a violation. A component's licence matches when the identifier appears in it, so `AGPL-3.0` covers `AGPL-3.0-only` and `AGPL-3.0-or-later`."
+        }
+      },
+      "maxViolations": 0
+    },
+    "sbom-standard-format": {
+      "name": "The bill of materials is in a standard format",
+      "description": "The bill of materials uses a standard format other tools can read, and declares which version of that format it follows.",
+      "severity": "warning",
+      "collect": [
+        "sbom"
+      ],
+      "remediation": "Write the bill of materials as CycloneDX or SPDX, not in the scanner's own format:\n\n```bash\nsyft dir:. -o cyclonedx-json=bom.json\ntrivy fs --format cyclonedx --output bom.json .\n```\n\nAn inventory is only useful if whatever consumes it, possibly years later, can still read it, and that consumer is rarely the tool that wrote it. A format with no declared version causes the same problem one step later: nothing can tell which fields it was allowed to leave out.",
+      "check": {
+        "run": "sbom-standard-format.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "formats": {
+          "default": "cyclonedx,spdx",
+          "description": "Comma separated formats that are accepted."
+        },
+        "requireSpecVersion": {
+          "default": "true",
+          "description": "Whether the document must declare which version of the format it follows."
+        }
+      },
+      "maxViolations": 0
+    },
+    "disallowed-components": {
+      "name": "No component the team refuses is in the artifact",
+      "description": "No component in the bill of materials is one the team has decided it won't ship, however it got there.",
+      "severity": "error",
+      "collect": [
+        "sbom"
+      ],
+      "remediation": "Remove the components named in the violations. For a component that arrived transitively, exclude it where it is pulled in and declare the replacement explicitly:\n\n```kotlin\nimplementation(\"com.company:service\") {\n    exclude(group = \"org.abandoned\", module = \"parser\")\n}\nimplementation(\"org.maintained:parser:2.1.0\")\n```\n\nThis guardrail holds the team's list of components it has already decided against: a withdrawn package, one that was taken over, or one an incident was traced to. Without it, that decision lives only in the memory of whoever made it.",
+      "check": {
+        "run": "disallowed-components.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "components": {
+          "default": "",
+          "description": "Comma separated component names or package URL fragments that are a violation, such as `event-stream,pkg:npm/left-pad`. If empty, the team hasn't named any and the guardrail skips."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

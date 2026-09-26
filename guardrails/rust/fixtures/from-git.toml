@@ -1,0 +1,12 @@
+[package]
+name = "widget"
+version = "1.2.3"
+edition = "2021"
+rust-version = "1.76"
+
+[dependencies]
+serde = { version = "1.0.197", features = ["derive"] }
+tracing = { git = "https://github.com/tokio-rs/tracing", branch = "master" }
+
+[dev-dependencies]
+proptest = { git = "https://github.com/proptest-rs/proptest" }

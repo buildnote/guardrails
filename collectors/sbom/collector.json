@@ -1,0 +1,41 @@
+{
+  "id": "sbom",
+  "version": "v1",
+  "name": "Software bill of materials",
+  "description": "The components a build says it ships, read from the bill of materials it already wrote (CycloneDX or SPDX, in JSON, XML or tag-value) and normalized into one list with the licence each component names.",
+  "icon": "icon.svg",
+  "run": "sbom.py",
+  "scope": "repository",
+  "timeoutSeconds": 60,
+  "inputs": {
+    "reports": {
+      "default": "bom.json,bom.xml,*.cdx.json,*.cdx.xml,cyclonedx*.json,cyclonedx*.xml,sbom*.json,*.spdx.json,sbom*.spdx",
+      "description": "Comma separated globs matched against every file in the working directory and against bare file names, naming the bills of materials to read."
+    },
+    "maxComponents": {
+      "default": "500",
+      "description": "Maximum number of components to carry in the facts. The counts still include components that are dropped."
+    }
+  },
+  "facts": {
+    "source": "`report` when a bill of materials was read, `none` when there was none.",
+    "reason": "Why nothing was read, present only when `source` is `none`.",
+    "reports": "Every bill of materials that was read, in path order.",
+    "reports[].path": "Path of the bill of materials, relative to the directory the CLI runs in.",
+    "reports[].modified": "When it was last written, ISO 8601, so a bill of materials older than the build is recognisable.",
+    "reports[].format": "Format it was read as: `cyclonedx` or `spdx`.",
+    "format": "Format of the first bill of materials read, `cyclonedx` or `spdx`. Each report carries its own in `reports[].format`.",
+    "specVersion": "Specification version that first bill of materials declares, such as `1.5` or `SPDX-2.3`, or `null` when it declares none.",
+    "counts.total": "Components across every bill of materials that was read.",
+    "counts.licensed": "Components naming at least one licence.",
+    "counts.unlicensed": "Components naming none.",
+    "licenses": "Licence identifier to the number of components naming it. A component naming two licences counts under both.",
+    "components": "The components themselves, up to `maxComponents`.",
+    "components[].name": "Name of the component, as the bill of materials names it.",
+    "components[].version": "Version of the component, empty when it carries none.",
+    "components[].purl": "Package URL of the component, or `null` when it carries none.",
+    "components[].type": "What the component is, such as `library`, `application` or `container`, or `null`.",
+    "components[].licenses": "Every licence the component names, by identifier or expression.",
+    "dropped": "Components left out because `maxComponents` was reached."
+  }
+}

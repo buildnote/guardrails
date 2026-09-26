@@ -1,0 +1,21 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "widget",
+  "packages": [
+    {
+      "name": "kotlin-stdlib",
+      "versionInfo": "2.1.0",
+      "primaryPackagePurpose": "LIBRARY",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceType": "purl",
+          "referenceLocator": "pkg:maven/org.jetbrains.kotlin/kotlin-stdlib@2.1.0"
+        }
+      ]
+    },
+    {"name": "mystery", "versionInfo": "0.1.0", "licenseConcluded": "NOASSERTION"}
+  ]
+}

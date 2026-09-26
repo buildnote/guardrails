@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="29afb69d-9a66-49f7-bc93-a537a0db9862" name="buildnote@examples-pc 2026-08-20 08:31:33" runUser="examples-pc\buildnote" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-08-20T08:31:33.0390097+02:00" queuing="2026-08-20T08:31:33.0390107+02:00" start="2026-08-20T08:31:31.9866971+02:00" finish="2026-08-20T08:31:33.1023832+02:00" />
+  <Results>
+    <UnitTestResult executionId="3181d0c8-88ef-42c2-8375-0be2ff86197d" testId="41c1dee7-2d17-4cf3-ae64-fae6fd9f9105" testName="DotnetTests.XUnitTests.CalculatorTests.Passing_Test" computerName="examples-pc" duration="00:00:00.1084258" startTime="2026-08-20T08:31:32.9669698+02:00" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <UnitTestResult executionId="705f6132-7d4c-48c4-afdc-cadb427a4255" testId="3bd3c92f-b8b2-2f41-9211-951100aa2540" testName="DotnetTests.XUnitTests.CalculatorTests.Failing_Test" computerName="examples-pc" duration="00:00:00.0038697" startTime="2026-08-20T08:31:32.9742636+02:00" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Equal() Failure Expected: 3 Actual: 2</Message>
+          <StackTrace>   at DotnetTests.XUnitTests.CalculatorTests.Failing_Test()</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9a6bc7d8-3abd-4369-aa02-418530a1bf59" testId="55ef2114-eb39-77d8-4031-3da68d0dc505" testName="DotnetTests.XUnitTests.CalculatorTests.Skipped_Test" computerName="examples-pc" duration="00:00:00.0010000" startTime="2026-08-20T08:31:33.0075607+02:00" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d">
+      <Output>
+        <StdOut>Skipped test</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="DotnetTests.XUnitTests.CalculatorTests.Passing_Test" storage="/build/dotnettests.xunittests.dll" id="41c1dee7-2d17-4cf3-ae64-fae6fd9f9105">
+      <Execution id="3181d0c8-88ef-42c2-8375-0be2ff86197d" />
+      <TestMethod codeBase="/build/dotnettests.xunittests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DotnetTests.XUnitTests.CalculatorTests" name="Passing_Test" />
+    </UnitTest>
+    <UnitTest name="DotnetTests.XUnitTests.CalculatorTests.Failing_Test" storage="/build/dotnettests.xunittests.dll" id="3bd3c92f-b8b2-2f41-9211-951100aa2540">
+      <Execution id="705f6132-7d4c-48c4-afdc-cadb427a4255" />
+      <TestMethod codeBase="/build/dotnettests.xunittests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DotnetTests.XUnitTests.CalculatorTests" name="Failing_Test" />
+    </UnitTest>
+    <UnitTest name="DotnetTests.XUnitTests.CalculatorTests.Skipped_Test" storage="/build/dotnettests.xunittests.dll" id="55ef2114-eb39-77d8-4031-3da68d0dc505">
+      <Execution id="9a6bc7d8-3abd-4369-aa02-418530a1bf59" />
+      <TestMethod codeBase="/build/dotnettests.xunittests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="DotnetTests.XUnitTests.CalculatorTests" name="Skipped_Test" />
+    </UnitTest>
+  </TestDefinitions>
+  <ResultSummary outcome="Failed">
+    <Counters total="3" executed="2" passed="1" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" notExecuted="1" />
+  </ResultSummary>
+</TestRun>

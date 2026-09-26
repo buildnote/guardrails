@@ -1,0 +1,6 @@
+<TestRun id="1">
+          <Results>
+            <UnitTestResult testId="a" testName="Broken" outcome="Error" duration="00:00:01.5000000"/>
+            <UnitTestResult testId="b" testName="Slow" outcome="Timeout" duration="00:01:00.0000000"/>
+          </Results>
+        </TestRun>

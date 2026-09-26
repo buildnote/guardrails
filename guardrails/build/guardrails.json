@@ -1,0 +1,91 @@
+{
+  "version": "v1",
+  "category": "build",
+  "icon": "icon.svg",
+  "guardrails": {
+    "runs-on-hosted-ci": {
+      "name": "The build runs on a managed CI runner",
+      "description": "The artifact was built on a CI platform, not on someone's workstation, so the build is attributable and repeatable.",
+      "severity": "error",
+      "collect": [
+        "env"
+      ],
+      "remediation": "Build releasable artifacts in your pipeline, not on a laptop. A workstation build has no attributable identity, no clean environment and no record, and those are what SLSA Build L2 expects a build platform to provide.\n\nIf running guardrails on a workstation is legitimate, exempt it locally instead of removing the guardrail:\n\n```bash\nbuildnote guardrails --only git/conventional-commits\n```",
+      "check": {
+        "run": "runs-on-hosted-ci.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowSelfHosted": {
+          "default": "true",
+          "description": "Whether a self-hosted runner counts. Set it to `false` if you only trust the provider's own hosted fleet to build a release."
+        }
+      },
+      "maxViolations": 0
+    },
+    "wrapper-distribution-verified": {
+      "name": "The build tool distribution is verified",
+      "description": "The Gradle wrapper pins the checksum of the distribution it downloads, so nobody can swap the toolchain underneath the build.",
+      "severity": "error",
+      "collect": [
+        "gradle"
+      ],
+      "remediation": "Regenerate the wrapper and have it record the distribution checksum:\n\n```bash\n./gradlew wrapper --gradle-version 8.14 --gradle-distribution-sha256-sum <sha>\n```\n\nGradle publishes the checksum of every distribution at <https://gradle.org/release-checksums/>. Without `distributionSha256Sum`, the wrapper runs whatever the distribution URL serves, which leaves the build tool itself outside the chain of custody the rest of your pipeline maintains.",
+      "check": {
+        "run": "wrapper-distribution-verified.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "projectDir": {
+          "default": ".",
+          "description": "Directory holding the project, relative to the directory the CLI runs in."
+        }
+      },
+      "maxViolations": 0
+    },
+    "dependency-updates-configured": {
+      "name": "Dependency updates are automated",
+      "description": "The repository configures a tool that opens dependency updates, so upgrades arrive as pull requests you can review instead of as a chore nobody has time for.",
+      "severity": "warning",
+      "collect": [
+        "files"
+      ],
+      "remediation": "Configure Dependabot with `.github/dependabot.yml`:\n\n```yaml\nversion: 2\nupdates:\n  - package-ecosystem: gradle\n    directory: \"/\"\n    schedule:\n      interval: weekly\n  - package-ecosystem: github-actions\n    directory: \"/\"\n    schedule:\n      interval: weekly\n```\n\nRenovate, configured with `renovate.json`, works just as well. Either way, each upgrade arrives as a pull request your tests run against, which is the only form in which it competes for attention with the rest of the work. A dependency nobody automates gets upgraded when a vulnerability forces it, and that is the worst moment to jump several major versions at once.",
+      "check": {
+        "run": "dependency-updates-configured.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "paths": {
+          "default": ".github/dependabot.yml,.github/dependabot.yaml,renovate.json,renovate.json5,.renovaterc,.renovaterc.json,.github/renovate.json",
+          "description": "Comma separated paths, any one of which satisfies the guardrail."
+        }
+      },
+      "maxViolations": 0
+    },
+    "gradle-version-floor": {
+      "name": "The Gradle wrapper is no older than the floor",
+      "description": "The Gradle version the wrapper pins is at or above the floor your team sets, so the build runs on a toolchain that is still supported.",
+      "severity": "warning",
+      "collect": [
+        "gradle"
+      ],
+      "remediation": "Upgrade the wrapper, which updates the properties and the scripts together:\n\n```bash\n./gradlew wrapper --gradle-version 9.0.0 --distribution-type bin\n./gradlew wrapper --gradle-version 9.0.0 --distribution-type bin\n```\n\nRun it twice: the first run writes the new properties, and the second runs under the new wrapper and finishes the job.\n\nA Gradle version far behind the floor doesn't just miss fixes. It also limits which JDK the build can run on, and every release it falls further behind turns the eventual upgrade from a version bump into a migration.",
+      "check": {
+        "run": "gradle-version-floor.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "projectDir": {
+          "default": ".",
+          "description": "Directory the Gradle build is read from, relative to the directory the CLI runs in."
+        },
+        "minVersion": {
+          "default": "8.0",
+          "description": "Oldest Gradle version the wrapper may pin."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,9 @@
+[package]
+name = "widget"
+version = "1.2.3"
+edition = "2021"
+rust-version = "1.76"
+
+[dependencies]
+serde = { version = "1.0.197", features = ["derive"] }
+anyhow = "1.0.81"

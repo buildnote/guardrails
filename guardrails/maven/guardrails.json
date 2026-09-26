@@ -1,0 +1,60 @@
+{
+  "version": "v1",
+  "category": "maven",
+  "icon": "icon.svg",
+  "collect": [
+    "maven"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "pom-parses": {
+      "name": "The POM parses",
+      "description": "The root `pom.xml` is well-formed XML, so the build it describes can be read at all.",
+      "severity": "error",
+      "remediation": "Fix the XML. Maven itself will tell you where it stops parsing:\n\n```bash\nmvn -q validate\n```\n\nMaven refuses to build a POM it can't parse, and tools that read the build get nothing from it. The coordinates, properties, modules and dependency list all fall back to their defaults, so every other Maven guardrail passes on a project it never actually saw.",
+      "check": {
+        "run": "pom-parses.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "dependencies-versioned": {
+      "name": "Maven dependencies are versioned",
+      "description": "Every dependency declared by the POM and its modules gets its version from the checkout: from the entry itself, from `<dependencyManagement>`, from an imported BOM or from a property. A parent POM published elsewhere isn't read, so a version managed only by that parent shows as unresolved.",
+      "severity": "warning",
+      "remediation": "Set the version where the build already manages versions. For a dependency several modules share, that is `<dependencyManagement>` in the root POM:\n\n```xml\n<dependencyManagement>\n  <dependencies>\n    <dependency>\n      <groupId>org.junit</groupId>\n      <artifactId>junit-bom</artifactId>\n      <version>5.10.2</version>\n      <type>pom</type>\n      <scope>import</scope>\n    </dependency>\n  </dependencies>\n</dependencyManagement>\n```\n\nIf nothing in the checkout sets a dependency's version, either something outside the checkout sets it, or nothing does and the build fails to resolve it. Either way, this commit doesn't decide the code that gets compiled in, so reading the diff doesn't tell you what changed.\n\nThe usual outside source is a `<parent>` published elsewhere, most often `spring-boot-starter-parent`. That build resolves fine; the dependency only shows as unversioned here because the parent isn't in the checkout to be read. That is why this guardrail is a warning and not a gate.",
+      "check": {
+        "run": "dependencies-versioned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-snapshot-dependencies": {
+      "name": "No snapshot dependencies",
+      "description": "No dependency declared by the POM and its modules, and no BOM they import, uses a `-SNAPSHOT` version.",
+      "severity": "error",
+      "remediation": "Depend on a released version. If the library doesn't have one yet, cut a release upstream:\n\n```xml\n<dependency>\n  <groupId>com.company</groupId>\n  <artifactId>queue</artifactId>\n  <version>1.4.0</version>\n</dependency>\n```\n\nA snapshot is republished under the same coordinates, so whatever `1.4.0-SNAPSHOT` resolved to on the day the build shipped is gone, and you can't rebuild this commit into the artifact that was released from it. A snapshot that `mvn install` put in a local repository is worse: it exists on one machine and nowhere a rebuild can reach.",
+      "check": {
+        "run": "no-snapshot-dependencies.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "coordinates-declared": {
+      "name": "Maven coordinates are declared",
+      "description": "The root POM names the group, artifact and version it publishes, either declaring them itself or inheriting the group and version from a `<parent>`.",
+      "severity": "warning",
+      "remediation": "Name the artifact in the POM, or inherit the group and version from the `<parent>` that already declares them:\n\n```xml\n<groupId>io.company</groupId>\n<artifactId>widget</artifactId>\n<version>1.4.0</version>\n```\n\nWithout all three, the build publishes something nobody can name. Consumers have no coordinates to depend on, and a jar found in a repository or a running service can't be traced back to the commit that produced it.",
+      "check": {
+        "run": "coordinates-declared.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

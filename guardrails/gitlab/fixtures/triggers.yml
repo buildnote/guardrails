@@ -1,0 +1,4 @@
+deploy:
+  stage: deploy
+  trigger:
+    project: company/infra

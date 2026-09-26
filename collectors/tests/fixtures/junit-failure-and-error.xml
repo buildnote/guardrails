@@ -1,0 +1,6 @@
+<testsuite name="units">
+            <testcase name="both">
+                <failure message="assertion"/>
+                <error message="exception"/>
+            </testcase>
+        </testsuite>

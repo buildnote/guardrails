@@ -1,0 +1,66 @@
+{
+  "version": "v1",
+  "category": "python",
+  "icon": "icon.svg",
+  "collect": [
+    "python"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Python version is declared",
+      "description": "The project declares the Python version it is built and run against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the interpreter where the project already describes itself: `requires-python = \">=3.12\"` under `[project]` in `pyproject.toml`, or a `.python-version` file naming the exact release. Without one, the interpreter is whatever the runner happens to have, so a syntax or standard library difference shows up in CI instead of on the laptop where it was introduced.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "3.9",
+          "description": "Oldest Python version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lockfile-committed": {
+      "name": "Python dependencies are locked",
+      "description": "The project commits a lock file, so an install of the same commit resolves the same versions.",
+      "severity": "warning",
+      "remediation": "Commit the lock file your installer writes:\n\n```bash\nuv lock          # writes uv.lock\npoetry lock      # writes poetry.lock\npip-compile      # writes requirements.txt from requirements.in\n```\n\nA `>=` or `~=` requirement resolves to whatever the index serves that day, so without a lock file the build that shipped is not the build that was reviewed.",
+      "check": {
+        "run": "lockfile-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "single-lockfile": {
+      "name": "One installer owns the environment",
+      "description": "The project commits at most one lock file, so two installers don't both try to manage the environment.",
+      "severity": "warning",
+      "remediation": "Pick the installer the project actually uses and delete the other lock files. A checkout with both `poetry.lock` and `uv.lock` installs different versions depending on which command the developer or CI step runs. The lock file nobody uses drifts silently until someone does use it.",
+      "check": {
+        "run": "single-lockfile.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "build-backend-declared": {
+      "name": "Build backend is declared",
+      "description": "A packaged project names its build backend in `[build-system]`, so it builds the same way everywhere.",
+      "severity": "warning",
+      "remediation": "Declare the backend in `pyproject.toml`:\n\n```toml\n[build-system]\nrequires = [\"hatchling\"]\nbuild-backend = \"hatchling.build\"\n```\n\nWithout a `[build-system]` table, PEP 517 falls back to legacy setuptools at whatever version the environment has, so the wheel a release produces depends on the machine that built it.",
+      "check": {
+        "run": "build-backend-declared.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

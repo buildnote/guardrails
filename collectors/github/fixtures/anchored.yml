@@ -1,0 +1,10 @@
+name: Anchored
+on: push
+defaults: &shared
+  run:
+    shell: bash
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: make

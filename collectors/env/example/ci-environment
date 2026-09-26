@@ -1,0 +1,12 @@
+CI=true
+GITHUB_ACTIONS=true
+GITHUB_EVENT_NAME=pull_request
+GITHUB_BASE_REF=main
+GITHUB_HEAD_REF=bound-the-queue
+GITHUB_WORKFLOW=pull request
+GITHUB_RUN_ID=8123456789
+RUNNER_ENVIRONMENT=github-hosted
+RUNNER_OS=Linux
+RUNNER_ARCH=X64
+RUNNER_NAME=GitHub Actions 4
+ACTIONS_ID_TOKEN_REQUEST_URL=https://pipelines.actions.githubusercontent.com/token

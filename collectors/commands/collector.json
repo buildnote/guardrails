@@ -1,0 +1,47 @@
+{
+  "id": "commands",
+  "version": "v1",
+  "name": "Executed commands",
+  "description": "Every command the build executed, read from the session a running `buildnote monitor` records on the runner. This is what the job actually ran, not what a pipeline file says it would run.",
+  "icon": "icon.svg",
+  "run": "commands.py",
+  "scope": "repository",
+  "timeoutSeconds": 60,
+  "inputs": {
+    "sessionsDir": {
+      "default": "",
+      "description": "Directory holding the monitor sessions. When unset, the collector reads the CLI's own `BUILDNOTE_MONITOR_DIR`, which is where `buildnote monitor` records and which the CLI resolves so this collector does not have to guess. If you run the collector by hand with neither set, it falls back to `buildnote-monitor` under the temporary directory."
+    },
+    "maxExecutions": {
+      "default": "1000",
+      "description": "How many executions to report before the rest are left out and counted in `dropped`. The earliest are kept, so a command run near the start of the job is still reported when the build goes past the limit later on."
+    }
+  },
+  "facts": {
+    "source": "`report` when a monitor session was read, `none` when there was none.",
+    "reason": "Why there was none, present only when `source` is `none`.",
+    "reports": "The session that was read.",
+    "reports[].path": "Absolute path of the session file on the runner. A monitor records outside the checkout, so this is the one path in the facts that is not stated from the directory the CLI runs in.",
+    "reports[].modified": "When it was last written, ISO 8601. A session still being appended to was written seconds ago.",
+    "reports[].format": "Always `monitor-session`.",
+    "monitor": "The monitor whose session was read.",
+    "monitor.running": "Whether the monitor is still recording, meaning the session has no closing record. `false` means the monitor finished and the commands are the whole of what it traced.",
+    "monitor.matched": "How the session was chosen: `build` when it records the build this run belongs to, which is the case whenever the monitor and the guardrails run in the same job, and `recent` when no session names this build and the most recent one was read instead.",
+    "monitor.sessions": "How many sessions were found in that directory. More than one means another monitor has recorded on this runner.",
+    "monitor.pid": "Process the monitor is running as.",
+    "monitor.startedAt": "When the monitor started recording, epoch milliseconds.",
+    "monitor.closedAt": "When it stopped, epoch milliseconds, or `null` while it is still recording.",
+    "monitor.build": "Build the monitor recorded for, which is what `matched` compares against.",
+    "monitor.module": "Module the monitor submits its commands under.",
+    "monitor.command": "The command the monitor launched, or `null` when it attached to a process it did not start.",
+    "commands": "Every command that was executed, one entry per execution, in the order they were executed. A command run twice is two entries.",
+    "commands[].command": "The command line, exactly as the process was executed, truncated to 2000 characters. Arguments are separated by single spaces and their original quoting is gone: this is the process's argument vector joined, not the shell line that produced it.",
+    "commands[].pid": "Process the command ran as. A pid is reused within a job, so it identifies an execution only alongside its timestamp.",
+    "commands[].startedAt": "When it was executed, epoch milliseconds.",
+    "commands[].durationMs": "How long it ran, milliseconds, or `null` when it was not seen to exit.",
+    "commands[].exitCode": "The code it exited with, or `null` when it was not seen to exit, which is a command still running or one the monitor stopped tracing before it finished.",
+    "counts.executions": "How many commands were executed in total, including any left out by `maxExecutions`.",
+    "counts.commands": "How many distinct command lines are among the executions reported.",
+    "dropped": "Executions left out because `maxExecutions` was reached. Above zero, the list describes only part of the build: a command found here is real, but a command missing from it is not proof the build never ran it, so a check that would otherwise report clean must skip."
+  }
+}

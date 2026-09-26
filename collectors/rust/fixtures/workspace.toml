@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/*"]
+exclude = ["crates/scratch"]
+
+[workspace.dependencies]
+serde = "1.0.197"

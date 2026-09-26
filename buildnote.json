@@ -1,0 +1,20 @@
+{
+  "collect": {
+    "junit": {
+      "enabled": true,
+      "include": [
+        "**/build/test-results/TEST-*.xml"
+      ]
+    }
+  },
+  "report": {
+    "github": {
+      "enabled": true,
+      "commentEnabled": true
+    },
+    "html": {
+      "enabled": true,
+      "outputFile": "build/report.html"
+    }
+  }
+}

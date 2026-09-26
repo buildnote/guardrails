@@ -1,0 +1,10 @@
+{
+  "results": {
+    "tool": {"name": "jest"},
+    "summary": {"tests": 2, "passed": 1, "failed": 1},
+    "tests": [
+      {"name": "renders the widget", "status": "passed", "duration": 12, "suite": "App", "filePath": "src/App.test.tsx"},
+      {"name": "reports an error", "status": "failed", "duration": 4, "suite": "App", "filePath": "src/App.test.tsx"}
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "files",
+  "version": "v1",
+  "name": "Repository files",
+  "description": "Presence, size and line counts of the well known files a repository is expected to carry, plus any extra path the guardrail asks for.",
+  "icon": "icon.svg",
+  "run": "files.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "paths": {
+      "default": "README.md,README.rst,LICENSE,LICENSE.md,CONTRIBUTING.md,CODE_OF_CONDUCT.md,SECURITY.md,.gitignore",
+      "description": "Comma separated paths to describe, relative to the directory the CLI runs in."
+    },
+    "path": {
+      "default": "",
+      "description": "One further path to describe, so a guardrail configured with its own path is collected too."
+    }
+  },
+  "facts": {
+    "files": "Every requested path, keyed exactly as it was asked for. A path nobody asked for is absent, so look up the one the guardrail configured instead of iterating. Unlike every other collector's paths, the key is deliberately not resolved from the directory the CLI runs in: `files[\"AGENTS.md\"]` means the same thing whichever directory a policy checks, and `files[path].location` says where it was actually looked for.",
+    "files[path].present": "Whether the path is a file.",
+    "files[path].location": "Where the path was looked for, from the directory the CLI runs in, so a policy covering several directories can tell one module's `AGENTS.md` from another's.",
+    "files[path].symlink": "Whether the path is a symbolic link, present only when it is one. A link to an existing file is `present` as well; a link pointing at nothing is not `present`.",
+    "files[path].symlinkTarget": "What the link points at, exactly as it was written, present only when the path is a link. A relative target is resolved from the directory the link sits in, not from the directory the CLI runs in.",
+    "files[path].bytes": "Size in bytes. Absent when the file is not present or could not be read.",
+    "files[path].lines": "Line count. Absent when the file is not present or could not be read.",
+    "files[path].nonBlankLines": "Lines carrying something other than whitespace. Absent when the file is not present or could not be read.",
+    "files[path].unreadable": "Why the file could not be read, present only when it could not be."
+  }
+}

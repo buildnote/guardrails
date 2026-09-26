@@ -1,0 +1,48 @@
+{
+  "id": "clojure",
+  "version": "v1",
+  "name": "Clojure build",
+  "description": "The Clojure build in the project directory: which tool it uses, the Clojure version it depends on, the source paths and aliases it declares, the repositories it resolves from, and every dependency with its alias, origin and whether it is pinned.",
+  "icon": "icon.svg",
+  "run": "clojure.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: `deps.edn` when there is one, otherwise `project.clj`.",
+    "sources": "Every manifest that was read and understood, in the order they were read. One the reader could not handle is in `unparsed` instead.",
+    "scanned": "Every manifest that is Clojure rather than data and was read by pattern. `project.clj` is a `defproject` form, so what it builds with a function or a reader conditional is not seen; `deps.edn` is EDN and is read whole, so it never appears here.",
+    "tool": "Which build tool the checkout uses: `clojure-cli` for `deps.edn`, `leiningen` for `project.clj`, or `both` when it carries each.",
+    "declared": "The Clojure version the project depends on, or `null` when it names none and the tool's own default decides.",
+    "declared.version": "Version exactly as written, such as `1.11.3`.",
+    "declared.source": "Manifest declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether it names one exact version. Both tools take a literal version rather than a range, so this is `false` only for a `RELEASE`, a `LATEST` or a `SNAPSHOT`.",
+    "paths": "Source paths the manifest declares, such as `src` and `resources`.",
+    "aliases": "Names of the aliases `deps.edn` declares, such as `test` and `build`. An alias carries its own dependencies and its own JVM options.",
+    "repositories": "Every Maven repository the manifest adds beyond the defaults, by name. A repository nobody vetted is what a dependency confusion attack needs.",
+    "repositories[].name": "Name the manifest keys it by, such as `clojars`.",
+    "repositories[].url": "URL it resolves from, or `null` when the entry names none.",
+    "projects": "The one project the manifest declares. Neither tool has workspaces.",
+    "projects[].path": "Directory of the project, from the directory the CLI runs in, always `directory` itself.",
+    "projects[].manifest": "Its manifest, from the directory the CLI runs in.",
+    "projects[].name": "Name the `defproject` form declares, or `null` when there is none to read it from.",
+    "dependencies": "What the manifests declare, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every dependency the reader saw, the root's first and each alias's after it.",
+    "dependencies.direct[].name": "Coordinates as the manifest writes them, such as `org.clojure/clojure` or `io.github.company/queue`.",
+    "dependencies.direct[].version": "Version exactly as written, or `null` when the dependency comes from a git URL or a local root.",
+    "dependencies.direct[].scopes": "`default` for a dependency at the top level, otherwise the alias or Leiningen profile that adds it, such as `test`.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the version names one exact release. A `RELEASE`, a `LATEST` or a `-SNAPSHOT` is not pinned, and neither is a git dependency without a `:git/sha`.",
+    "dependencies.direct[].origin": "Where it comes from: `maven`, `git` for a `:git/url` coordinate, or `local` for a `:local/root`.",
+    "dependencies.transitive": "Always empty. Neither tool commits a resolved graph, so there is none to read.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

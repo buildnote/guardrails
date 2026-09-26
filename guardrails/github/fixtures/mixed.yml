@@ -1,0 +1,13 @@
+name: build
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - run: ./gradlew build
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./publish.sh

@@ -1,0 +1,48 @@
+{
+  "id": "cpp",
+  "version": "v1",
+  "name": "C and C++ build",
+  "description": "The C or C++ build in the project directory: which build system and package manager it uses, the C++ standard and CMake version it requires, the packages it declares and which of them are pinned, and the packages it expects the machine to carry. `CMakeLists.txt` is a script, so what it declares conditionally is not seen and `scanned` says so.",
+  "icon": "icon.svg",
+  "run": "cpp.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: `CMakeLists.txt` when there is one, otherwise the package manifest that was found.",
+    "sources": "Every manifest that was read and understood, in the order they were read. One the reader could not handle is in `unparsed` instead.",
+    "scanned": "Every manifest that is a program rather than a declaration and was read by pattern. `CMakeLists.txt` and `conanfile.py` are scripts, so a target or a dependency added inside an `if()` or a function is not seen.",
+    "buildSystem": "Which build system the checkout uses: `cmake`, `meson`, `bazel`, `make`, or `null` when none of them is there and only a package manifest was found.",
+    "packageManager": "Which package manager declares the dependencies: `vcpkg`, `conan`, `both`, or `null` when neither is there and dependencies are vendored or found on the system.",
+    "declared": "The C++ standard the build asks for, or `null` when it asks for none and the compiler's default decides.",
+    "declared.version": "Standard as written, such as `20`.",
+    "declared.source": "Manifest declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the build requires that standard rather than treating it as a preference. `CXX_STANDARD_REQUIRED` off means the compiler may fall back to an older one.",
+    "cmakeMinimum": "The version `cmake_minimum_required` names, such as `3.25`, or `null` when the reader saw none. Below 3.5, modern CMake refuses to configure at all.",
+    "baseline": "The `builtin-baseline` commit `vcpkg.json` pins, which is what makes a vcpkg build reproducible, or `null` when it pins none.",
+    "projects": "Every project the reader saw: each `project()` call in a `CMakeLists.txt`, or the package the manifest declares.",
+    "projects[].path": "Directory of the project, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "The manifest declaring it, from the directory the CLI runs in.",
+    "projects[].name": "Name it declares, or `null` when the reader could not see one.",
+    "dependencies": "What the manifests declare, split by whether the build asks for it itself.",
+    "dependencies.direct": "Every dependency the package manifests name, in manifest order. A library found with `find_package` and no manifest entry is not one of these, because nothing in the checkout says which version it expects.",
+    "dependencies.direct[].name": "Package name, such as `fmt`.",
+    "dependencies.direct[].version": "Version exactly as written, such as `10.2.1`, or `null` when the entry names none and the registry baseline decides.",
+    "dependencies.direct[].scopes": "`default`, or `test` for a vcpkg feature named `test` and `build` for a Conan build requirement.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the entry names one exact version. A vcpkg `version>=` is a floor rather than a pin, and an entry with no version at all is decided by the baseline.",
+    "dependencies.transitive": "Always empty. What a resolver settles on is not read: `lockfiles` says whether one is committed.",
+    "findPackages": "Every package a `CMakeLists.txt` looks for with `find_package`, which is what the build expects the machine to already carry.",
+    "languages": "Every language a `project()` call enables, such as `C` and `CXX`, in the order they are named. Empty when no call names any, in which case CMake enables both C and C++, and `[\"NONE\"]` when a call disables them. A checkout whose only language is `C` has no C++ standard to declare.",
+    "lockfiles": "Every lock file committed, from the directory the CLI runs in, such as `conan.lock`.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a build that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

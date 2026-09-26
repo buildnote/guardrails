@@ -1,0 +1,82 @@
+{
+  "version": "v1",
+  "category": "kotlin",
+  "icon": "icon.svg",
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "build-manifest": {
+      "name": "Project has a build manifest",
+      "description": "The project declares a recognised build manifest, so the build is reproducible and tooling can find it.",
+      "severity": "error",
+      "collect": [
+        "gradle",
+        "maven"
+      ],
+      "remediation": "Add a build manifest at the project root: `build.gradle.kts` (Gradle Kotlin DSL), `build.gradle` (Gradle Groovy DSL) or `pom.xml` (Maven). Without one, nobody but the author can build the checkout.",
+      "check": {
+        "run": "build-manifest.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "gradle-wrapper": {
+      "name": "Gradle wrapper is committed",
+      "description": "A Gradle project commits `gradlew` and the wrapper properties that pin the Gradle version.",
+      "severity": "warning",
+      "collect": [
+        "gradle"
+      ],
+      "remediation": "Generate the wrapper and commit every file it writes:\n\n```bash\ngradle wrapper --gradle-version 8.14\ngit add gradlew gradlew.bat gradle/wrapper\n```\n\nThe wrapper pins the Gradle version, so the checkout builds the same way on a laptop and on CI, without installing Gradle first.",
+      "check": {
+        "run": "gradle-wrapper.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "kotlin-version-pinned": {
+      "name": "Kotlin version is pinned",
+      "description": "The build declares the Kotlin compiler version, and it is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the compiler version where the build applies the Kotlin plugin. For example, use `kotlin(\"jvm\") version \"2.4.0\"` in `build.gradle.kts`, a `kotlin` entry under `[versions]` in `gradle/libs.versions.toml`, or `<kotlin.version>` in `pom.xml`. Without it, the compiler version can drift between a laptop and CI.",
+      "check": {
+        "run": "kotlin-version-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "collect": [
+        "kotlin"
+      ],
+      "inputs": {
+        "minVersion": {
+          "default": "1.8",
+          "description": "Oldest Kotlin version accepted. A pinned version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "dependencies-locked": {
+      "name": "Gradle dependencies are locked",
+      "description": "The Gradle build commits the lock files that resolve its dependencies, so the same commit builds from the same versions.",
+      "severity": "warning",
+      "collect": [
+        "gradle"
+      ],
+      "remediation": "Turn on locking for every configuration and write the lock files:\n\n```kotlin\ndependencyLocking {\n    lockAllConfigurations()\n}\n```\n\n```bash\n./gradlew dependencies --write-locks\n```\n\nCommit the `gradle.lockfile` files this writes. Without them, a dynamic version, or a transitive dependency whose own range moved, can resolve differently when the same commit is rebuilt, so the build that shipped is not the build that was reviewed.",
+      "check": {
+        "run": "dependencies-locked.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minLockfiles": {
+          "default": "1",
+          "description": "Fewest lock files the build must commit."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

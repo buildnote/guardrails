@@ -1,0 +1,6 @@
+variables: &shared
+  region: eu-central-1
+jobs:
+  - job: build
+    steps:
+      - script: make

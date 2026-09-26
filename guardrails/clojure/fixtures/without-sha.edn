@@ -1,0 +1,4 @@
+{:paths ["src"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.11.3"}
+        io.github.company/drift {:git/url "https://github.com/company/drift"}}}

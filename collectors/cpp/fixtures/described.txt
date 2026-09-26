@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.25)
+project(widget DESCRIPTION "A CXX flavoured C library" LANGUAGES C)
+
+add_executable(widget src/main.c)

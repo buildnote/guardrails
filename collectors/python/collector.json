@@ -1,0 +1,49 @@
+{
+  "id": "python",
+  "version": "v1",
+  "name": "Python project",
+  "description": "The Python project in the project directory: its manifest and build backend, the Python version it asks for, the requirements it declares and which of them are pinned, and the lock files committed beside them.",
+  "icon": "icon.svg",
+  "run": "python.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    },
+    "requirements": {
+      "default": "requirements.txt,requirements-dev.txt,requirements/*.txt",
+      "description": "Comma separated globs naming the requirements files to read, from the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in: `pyproject.toml` when there is one, otherwise `setup.cfg`, `setup.py` or the first requirements file found, in that order.",
+    "sources": "Every manifest that was read and understood, in the order they were read. A manifest the reader could not handle is in `unparsed` instead.",
+    "declared": "The Python version the project asks for, or `null` when it asks for none. `.python-version` wins over `requires-python`, because it is what a developer's shell reads.",
+    "declared.version": "Constraint exactly as written, such as `>=3.11` or `3.12.2`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether the constraint names one exact version rather than a range. A `>=`, a `~=`, a `^`, a `*` or a comma separated range is not pinned.",
+    "backend": "The build backend `[build-system]` names, such as `hatchling.build` or `poetry.core.masonry.api`, or `null` when the project declares none and setuptools is implied.",
+    "packaging": "How the project declares its dependencies: `pep621` for `[project]`, `poetry` for `[tool.poetry]`, `setuptools` for `setup.cfg` or `setup.py`, `requirements` when only requirements files were found.",
+    "projects": "Every package in the build: the root, followed by every member a `[tool.uv.workspace]` or `[tool.poetry.group]` path names.",
+    "projects[].path": "Directory of the package, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "That package's `pyproject.toml`, from the directory the CLI runs in.",
+    "projects[].name": "Name the manifest declares, or `null` when it declares none.",
+    "dependencies": "What the manifests declare, split by whether the project asks for it itself.",
+    "dependencies.direct": "Every requirement any manifest declares, in manifest order.",
+    "dependencies.direct[].name": "Distribution name, lower cased with runs of `_`, `.` and `-` normalised to `-`, which is how the index compares two names.",
+    "dependencies.direct[].version": "Constraint exactly as written, such as `>=0.27`, or `null` when the requirement names none.",
+    "dependencies.direct[].scopes": "Which group declares it: `default`, an extra's own name, a Poetry group's name, or the requirements file's stem.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the constraint names one exact version with `==`, which is the only operator that does.",
+    "dependencies.direct[].marker": "Environment marker the requirement carries, such as `python_version < \"3.12\"`, or `null` when it carries none. A marked requirement is not installed everywhere.",
+    "dependencies.transitive": "Always empty. What a lock file resolves is not read: `lockfiles` says whether one is committed.",
+    "requirements": "Every requirements file that was read, from the directory the CLI runs in.",
+    "lockfiles": "Every lock file committed, from the directory the CLI runs in. More than one means two installers each believe they own the environment.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a project that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

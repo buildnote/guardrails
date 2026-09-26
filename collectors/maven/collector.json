@@ -1,0 +1,42 @@
+{
+  "id": "maven",
+  "version": "v1",
+  "name": "Maven build",
+  "description": "The Maven build in the project directory: the root `pom.xml` coordinates, its modules, its properties and every dependency it and its modules declare, with the versions its imported BOMs supply.",
+  "icon": "icon.svg",
+  "run": "maven.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected, and when the directory holds no `pom.xml`, the collector collects nothing at all.",
+    "pom": "The project's `pom.xml`, from the directory the CLI runs in, or `null` when there is none.",
+    "root": "Directory holding the POM this one names as its `<parent>`, from the directory the CLI runs in, or `null` when the POM declares no parent, resolves it from the repository with an empty `<relativePath>`, or has none above it. It is never looked for above the directory the CLI runs in, so a module checked on its own inherits the properties, managed versions and imported BOMs of its parent rather than resolving none of them. Nothing else from the parent is collected: `coordinates`, `modules` and the dependencies remain those of `directory`.",
+    "sources": "The build files that were there to read, from the directory the CLI runs in, followed by the POM in `root` when there is one.",
+    "malformed": "Whether the POM could not be parsed. The coordinates, properties and modules keep their defaults when it is `true`, and the fact is absent when there is no POM at all.",
+    "coordinates.groupId": "Group id, inherited from the parent when the POM declares none.",
+    "coordinates.artifactId": "Artifact id.",
+    "coordinates.version": "Version, inherited from the parent when the POM declares none.",
+    "coordinates.packaging": "Packaging, `jar` when the POM declares none.",
+    "properties": "Every entry under `<properties>`, by name, with the ones the POM in `root` declares underneath the project's own.",
+    "modules": "Every module the POM declares.",
+    "modules[].path": "Module directory, from the directory the CLI runs in.",
+    "modules[].pom": "The module's POM path when it is there, `null` when it is not.",
+    "modules[].coordinates": "The module's own coordinates, shaped as above, or `null` when its POM could not be read.",
+    "dependencies": "Every dependency that the root POM and every checked-in module POM take on, inside a `<profile>` or outside one, split by whether a POM declares it. A plain `<dependencyManagement>` entry is a managed version, not a dependency, so it is not listed. A dependency a module inherits from its parent is listed against the POM declaring it, not against both.",
+    "dependencies.direct": "Every dependency a POM declares, the root POM first, together with every BOM they import.",
+    "dependencies.direct[].path": "`group:name` of the dependency.",
+    "dependencies.direct[].version": "Version, filled in from `<dependencyManagement>` when the dependency declares none, taken from an imported BOM when nothing manages it, and resolved through the properties in scope. `null` when nothing resolves one.",
+    "dependencies.direct[].scopes": "The scope declared, `compile` when the POM declares none and `import` for a BOM. One entry, because a POM declares a dependency once.",
+    "dependencies.direct[].source": "POM declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].profile": "Present only when a `<profile>` declares it, and then that profile's id. The POM alone does not say whether the profile activates.",
+    "dependencies.direct[].platform": "Present and `true` only when it is a `<dependencyManagement>` entry imported with `<scope>import</scope>`, meaning it is a BOM supplying versions rather than code.",
+    "dependencies.direct[].managedBy": "Present only when the `version` came from an imported BOM, and then that BOM's `group:name:version`. A version `<dependencyManagement>` supplies in the same build carries no `managedBy`, because the POM states it. The BOM is not in the repository, so it is never read: it is matched to a dependency by **group**, most specific first, and the version taken is the BOM's own. Treat a version carrying a `managedBy` as a hint rather than a fact. It is wrong wherever the BOM does not publish one version line for the whole group, and it is set even on a coordinate the BOM never lists but whose group happens to sit under it. A BOM imported by the root POM supplies versions to every module; one imported by a module supplies only that module; and one imported by the POM in `root` supplies `projectDir` and every module of it.",
+    "dependencies.transitive": "Always empty. A Maven build checks in no resolved dependency graph, so nothing but the declared dependencies is visible without running Maven."
+  }
+}

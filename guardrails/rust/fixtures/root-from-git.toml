@@ -1,0 +1,10 @@
+[package]
+name = "widget"
+version = "1.2.3"
+edition = "2021"
+
+[workspace]
+members = ["crates/*"]
+
+[dependencies]
+tracing = { git = "https://github.com/tokio-rs/tracing" }

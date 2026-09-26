@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "category": "php",
+  "icon": "icon.svg",
+  "collect": [
+    "php"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "PHP version is declared",
+      "description": "The project declares the PHP version Composer resolves against, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Declare the PHP versions the package supports in `composer.json`:\n\n```json\n{\n  \"require\": { \"php\": \">=8.2\" }\n}\n```\n\nIf you know the deployed runtime, add `\"config\": { \"platform\": { \"php\": \"8.2.18\" } }` next to it, because that is the version Composer resolves against. Without either, `composer update` resolves against whichever PHP the machine running it has. A package that needs a newer runtime than production installs without complaint, and the failure shows up on the first request instead of at install time.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "8.1",
+          "description": "Oldest PHP version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "lockfile-committed": {
+      "name": "Composer dependencies are locked",
+      "description": "The project commits `composer.lock`, so an install of the same commit resolves the same versions.",
+      "severity": "warning",
+      "remediation": "Commit the lock file Composer writes:\n\n```bash\ncomposer update\ngit add composer.lock\n```\n\nA `^7.0` requirement resolves to whatever the registry serves that day, so without `composer.lock` an application installs differently on every deploy, and the versions that shipped are not the versions that were reviewed.",
+      "check": {
+        "run": "lockfile-committed.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "dependencies-constrained": {
+      "name": "Composer requirements are constrained",
+      "description": "Every package the manifest requires has a version constraint, instead of accepting whatever the registry serves.",
+      "severity": "warning",
+      "remediation": "Give every requirement a constraint naming the major release it was written against:\n\n```json\n{\n  \"require\": {\n    \"symfony/console\": \"^7.0\"\n  }\n}\n```\n\nA `*` requirement takes whatever the registry serves, including the next major release, so an upstream release can change what this project installs without any change in this repository.",
+      "check": {
+        "run": "dependencies-constrained.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

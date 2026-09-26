@@ -1,0 +1,85 @@
+{
+  "version": "v1",
+  "category": "tests",
+  "icon": "icon.svg",
+  "guardrails": {
+    "results-published": {
+      "name": "The build published its test results",
+      "description": "The build left a readable test report naming at least as many cases as the team expects, instead of reporting nothing at all.",
+      "severity": "error",
+      "collect": [
+        "tests"
+      ],
+      "remediation": "Before `buildnote guardrails` runs, write the test reports your test runner already produces into the workspace, and keep them there. Gradle writes JUnit XML to `build/test-results/`, and most runners take a flag:\n\n```bash\n./gradlew test\npytest --junitxml=junit.xml\ndotnet test --logger trx\n```\n\nA missing report is the violation. If a pipeline's test step went green but left nothing behind, you can't show it ran a single test, and a report with no test cases is the same thing. If a job genuinely has no tests, leave the guardrail off for that job instead of lowering `minTests` to zero.",
+      "check": {
+        "run": "results-published.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minTests": {
+          "default": "1",
+          "description": "Fewest test cases the reports must contain in total. A report with no cases doesn't count as a test run."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-failures": {
+      "name": "No test failed or errored",
+      "description": "Every test case in the reports passed or was skipped, so no failing test gets past the gate.",
+      "severity": "error",
+      "collect": [
+        "tests"
+      ],
+      "remediation": "Fix the failing tests, or delete the ones that no longer describe how the system behaves. A test that stays red stops being read, and the next real failure hides behind it.\n\nReproduce a single test case before pushing:\n\n```bash\n./gradlew test --tests 'com.company.widget.QueueTest'\n```\n\nIf a test fails because it's flaky, not because the code is wrong, quarantine it in the test framework so the quarantine can be reviewed next to the test. Turning off the guardrail makes the same decision somewhere nobody looks.",
+      "check": {
+        "run": "no-failures.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "coverage-floor": {
+      "name": "Coverage is at or above the floor",
+      "description": "The coverage the build measured is at or above the line and branch floors the team sets. Both floors default to zero, so the guardrail just reports the number until the team chooses one.",
+      "severity": "warning",
+      "collect": [
+        "coverage"
+      ],
+      "remediation": "Add tests for the code the change introduced, then set the floor to the coverage the build already reaches, so it can only go up from there:\n\n```json\n{\n  \"guardrails\": {\n    \"checks\": [\n      { \"use\": \"tests/coverage-floor@v1\", \"with\": { \"minLines\": \"72\" } }\n    ]\n  }\n}\n```\n\nThe guardrail needs a coverage report in the workspace, which most builds produce with a separate task:\n\n```bash\n./gradlew test jacocoTestReport\n```\n\nBoth floors default to `0`, so a build that hasn't chosen a number is never failed by one. Raise them as coverage improves. A floor set above where the build is today fails every change until someone lowers it, and that teaches the team to ignore it.",
+      "check": {
+        "run": "coverage-floor.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minLines": {
+          "default": "0",
+          "description": "Lowest line coverage percentage that passes, `0` for no floor. Only checked when the reports measured lines at all."
+        },
+        "minBranches": {
+          "default": "0",
+          "description": "Lowest branch coverage percentage that passes, `0` for no floor. Ignored when the reports contain no branch data, whether because the project has no branches or because the format omits them."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-skipped-growth": {
+      "name": "Skipped tests stay within budget",
+      "description": "The reports contain no more skipped cases than the budget allows. The budget is a fixed number in the configuration, not a comparison with the previous build, so it only catches growth if the team lowers the number as skipped tests come back.",
+      "severity": "warning",
+      "collect": [
+        "tests"
+      ],
+      "remediation": "Re-enable the skipped tests, or delete the ones that are never coming back. A skipped test still costs as much to maintain and tells you nothing.\n\nIf a skip is deliberate, set the budget to the number you accept, and lower it as tests are re-enabled:\n\n```json\n{\n  \"guardrails\": {\n    \"checks\": [\n      { \"use\": \"tests/no-skipped-growth@v1\", \"with\": { \"maxSkipped\": \"3\" } }\n    ]\n  }\n}\n```\n\nThis guardrail compares against `maxSkipped` and nothing else. It doesn't look at the previous build, so the number in the configuration is what holds the line, and lowering it is a commit someone reviews.",
+      "check": {
+        "run": "no-skipped-growth.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "maxSkipped": {
+          "default": "0",
+          "description": "Maximum number of cases the reports may mark as skipped, ignored or inconclusive."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

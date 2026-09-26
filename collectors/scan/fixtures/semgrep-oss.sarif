@@ -1,0 +1,23 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {"driver": {"name": "Semgrep OSS", "version": "1.86.0"}},
+      "results": [
+        {
+          "ruleId": "kotlin.lang.security.insecure-hostname-verifier",
+          "level": "error",
+          "message": {"text": "Hostname verification is disabled."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "service/src/main/kotlin/Queue.kt"},
+                "region": {"startLine": 12}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

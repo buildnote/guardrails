@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+        <test-results name="mock-assembly.dll" total="3" errors="1" failures="1" not-run="1" date="2026-08-20" time="11:34:27">
+          <test-suite type="Assembly" name="mock-assembly.dll" success="False" time="0.154" asserts="0">
+            <results>
+              <test-suite type="TestFixture" name="NUnit.Tests.MockTestFixture" success="False" time="0.119">
+                <results>
+                  <test-case name="NUnit.Tests.MockTestFixture.MockTest1" executed="True" success="True" time="0.010" asserts="0"/>
+                  <test-case name="NUnit.Tests.MockTestFixture.FailingTest" executed="True" success="False" result="Failure" time="0.023" asserts="0">
+                    <failure>
+                      <message><![CDATA[Intentional failure]]></message>
+                    </failure>
+                  </test-case>
+                  <test-case name="NUnit.Tests.MockTestFixture.IgnoreTest" executed="False" result="Ignored" time="0.001"/>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </test-results>

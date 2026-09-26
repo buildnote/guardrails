@@ -1,0 +1,5 @@
+go 1.22
+
+use ./service
+
+replace github.com/company/queue => ../queue

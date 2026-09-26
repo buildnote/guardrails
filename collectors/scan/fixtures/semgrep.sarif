@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Semgrep OSS",
+          "semanticVersion": "1.86.0",
+          "informationUri": "https://semgrep.dev",
+          "rules": [
+            {
+              "id": "python.lang.security.audit.subprocess-shell-true",
+              "name": "subprocess-shell-true",
+              "shortDescription": { "text": "Detected subprocess function with shell=True" },
+              "defaultConfiguration": { "level": "error" },
+              "properties": { "tags": ["security", "CWE-78"], "precision": "very-high" }
+            },
+            {
+              "id": "javascript.express.security.audit.express-open-redirect",
+              "name": "express-open-redirect",
+              "shortDescription": { "text": "Detected an open redirect" },
+              "defaultConfiguration": { "level": "warning" },
+              "properties": { "tags": ["security", "CWE-601"] }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "python.lang.security.audit.subprocess-shell-true",
+          "level": "error",
+          "message": { "text": "Detected subprocess function 'run' with shell=True" },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "tools/release.py", "uriBaseId": "%SRCROOT%" },
+                "region": { "startLine": 42, "startColumn": 5, "endLine": 42, "endColumn": 60 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "javascript.express.security.audit.express-open-redirect",
+          "level": "warning",
+          "message": { "text": "Detected an open redirect from user input" },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "server/routes.js" },
+                "region": { "startLine": 118 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "generic.secrets.security.detected-generic-api-key",
+          "level": "note",
+          "message": { "text": "Generic API key detected" },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "./config/staging.env" },
+                "region": { "startLine": 7 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

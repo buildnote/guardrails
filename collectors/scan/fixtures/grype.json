@@ -1,0 +1,64 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2021-44228",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": ["https://logging.apache.org/log4j/2.x/security.html"],
+        "description": "Apache Log4j2 JNDI features do not protect against attacker controlled LDAP endpoints.",
+        "cvss": [{ "version": "3.1", "metrics": { "baseScore": 10 } }],
+        "fix": { "versions": ["2.15.0"], "state": "fixed" }
+      },
+      "relatedVulnerabilities": [
+        { "id": "GHSA-jfh8-c2jp-5v3q", "namespace": "github:language:java", "severity": "Critical" }
+      ],
+      "artifact": {
+        "id": "b4c1e9f0a2d3",
+        "name": "log4j-core",
+        "version": "2.14.1",
+        "type": "java-archive",
+        "language": "java",
+        "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1",
+        "locations": [{ "path": "/app/lib/log4j-core-2.14.1.jar", "layerID": "sha256:2f0d1e" }]
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "GHSA-4w82-r329-3q67",
+        "namespace": "github:language:java",
+        "severity": "Medium",
+        "description": "Improper input validation in jackson-databind.",
+        "fix": { "versions": [], "state": "not-fixed" }
+      },
+      "relatedVulnerabilities": [],
+      "artifact": {
+        "name": "jackson-databind",
+        "version": "2.13.0",
+        "type": "java-archive",
+        "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.13.0",
+        "locations": [{ "path": "/app/lib/jackson-databind-2.13.0.jar" }]
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2023-45853",
+        "namespace": "alpine:distro:alpine:3.18",
+        "severity": "Negligible",
+        "description": "MiniZip in zlib has an integer overflow in zipOpenNewFileInZip4_64.",
+        "fix": { "versions": [], "state": "wont-fix" }
+      },
+      "artifact": {
+        "name": "zlib",
+        "version": "1.2.13-r1",
+        "type": "apk",
+        "purl": "pkg:apk/alpine/zlib@1.2.13-r1?arch=x86_64",
+        "locations": [{ "path": "/lib/apk/db/installed" }]
+      }
+    }
+  ],
+  "source": { "type": "image", "target": { "userInput": "company/service:1.4.0" } },
+  "distro": { "name": "alpine", "version": "3.18.4" },
+  "descriptor": { "name": "grype", "version": "0.79.6", "db": { "built": "2026-08-19T01:26:44Z" } }
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Company.Widget</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

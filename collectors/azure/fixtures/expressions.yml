@@ -1,0 +1,7 @@
+jobs:
+  - job: greet
+    steps:
+      - bash: |
+          echo "$(System.PullRequest.SourceBranch)"
+          echo "${{ parameters.name }}"
+          echo "$[ variables.counter ]"

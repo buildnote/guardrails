@@ -1,0 +1,4 @@
+<testsuite name="units">
+            <testcase name="a" time="0.25"/>
+            <testcase name="b" time="0.75"/>
+        </testsuite>

@@ -1,0 +1,31 @@
+name: build
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  - main
+
+variables:
+  - name: gradleOptions
+    value: -Dorg.gradle.daemon=false
+
+stages:
+  - stage: build
+    jobs:
+      - job: check
+        displayName: Build and test
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 15
+        steps:
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: '21'
+              jdkArchitectureOption: x64
+              jdkSourceOption: PreInstalled
+
+          - bash: ./gradlew check
+            displayName: Build

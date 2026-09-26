@@ -1,0 +1,32 @@
+{
+  "/repo/src/calculator.js": {
+    "path": "/repo/src/calculator.js",
+    "statementMap": {
+      "0": { "start": { "line": 3, "column": 2 }, "end": { "line": 3, "column": 18 } },
+      "1": { "start": { "line": 7, "column": 4 }, "end": { "line": 7, "column": 20 } },
+      "2": { "start": { "line": 7, "column": 22 }, "end": { "line": 7, "column": 40 } },
+      "3": { "start": { "line": 11, "column": 2 }, "end": { "line": 11, "column": 15 } }
+    },
+    "fnMap": {
+      "0": { "name": "add", "decl": { "start": { "line": 2, "column": 9 }, "end": { "line": 2, "column": 12 } }, "loc": { "start": { "line": 2, "column": 20 }, "end": { "line": 4, "column": 1 } } }
+    },
+    "branchMap": {
+      "0": { "loc": { "start": { "line": 7, "column": 4 }, "end": { "line": 7, "column": 40 } }, "type": "if", "locations": [{ "start": { "line": 7, "column": 4 }, "end": { "line": 7, "column": 20 } }, { "start": { "line": 7, "column": 22 }, "end": { "line": 7, "column": 40 } }], "line": 7 }
+    },
+    "s": { "0": 4, "1": 0, "2": 3, "3": 0 },
+    "f": { "0": 4 },
+    "b": { "0": [3, 0] }
+  },
+  "/repo/src/format.js": {
+    "path": "/repo/src/format.js",
+    "statementMap": {
+      "0": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 24 } },
+      "1": { "start": { "line": 2, "column": 2 }, "end": { "line": 2, "column": 30 } }
+    },
+    "fnMap": {},
+    "branchMap": {},
+    "s": { "0": 5, "1": 5 },
+    "f": {},
+    "b": {}
+  }
+}

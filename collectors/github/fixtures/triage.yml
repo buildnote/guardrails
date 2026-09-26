@@ -1,0 +1,17 @@
+name: Triage
+on:
+  pull_request_target:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_run:
+    workflows: [Build]
+    types: [completed]
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        run: |
+          echo "Thanks ${{ github.event.pull_request.title }}"
+          echo "${{ github.event.comment.body }}"

@@ -1,0 +1,8 @@
+{"session": {"pid": 4242, "startedAt": 1757500000000, "org": "company", "project": "widget", "module": "build", "build": "18342119027_1"}}
+{"executed": {"pid": 4310, "command": "git rev-parse HEAD", "startedAt": 1757500001000}}
+{"exited": {"pid": 4310, "completedAt": 1757500001200, "exitCode": 0}}
+{"executed": {"pid": 4311, "command": "./gradlew check", "startedAt": 1757500002000}}
+{"executed": {"pid": 4327, "command": "claude -p --output-format json --allowedTools Read 'review this diff'", "startedAt": 1757500090000}}
+{"exited": {"pid": 4327, "completedAt": 1757500140000, "exitCode": 0}}
+{"executed": {"pid": 4402, "command": "git rev-parse HEAD", "startedAt": 1757500150000}}
+{"exited": {"pid": 4402, "completedAt": 1757500150200, "exitCode": 0}}

@@ -1,0 +1,7 @@
+
+                dependencies {
+                    implementation 'org.slf4j:slf4j-api:1.7.36'
+                    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+                    runtimeOnly "com.h2database:h2:$h2Version"
+                }
+            

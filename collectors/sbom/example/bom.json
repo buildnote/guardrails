@@ -1,0 +1,39 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:6b2f7c6e-9f4a-4c0b-9a2f-1d5a3c7e8b10",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-02-11T09:14:02Z",
+    "component": { "type": "application", "name": "widget", "version": "1.4.0" }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "http4k-core",
+      "version": "6.57.2.0",
+      "purl": "pkg:maven/org.http4k/http4k-core@6.57.2.0",
+      "licenses": [{ "license": { "id": "Apache-2.0" } }]
+    },
+    {
+      "type": "library",
+      "name": "slf4j-api",
+      "version": "2.0.13",
+      "purl": "pkg:maven/org.slf4j/slf4j-api@2.0.13",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    },
+    {
+      "type": "library",
+      "name": "guava",
+      "version": "33.2.0-jre",
+      "purl": "pkg:maven/com.google.guava/guava@33.2.0-jre",
+      "licenses": [{ "license": { "id": "Apache-2.0" } }]
+    },
+    {
+      "type": "library",
+      "name": "logback-classic",
+      "version": "1.5.6",
+      "purl": "pkg:maven/ch.qos.logback/logback-classic@1.5.6"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+name: Empty
+on: push
+permissions: {}
+jobs:
+  bare:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - run: make

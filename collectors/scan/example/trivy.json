@@ -1,0 +1,22 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "service",
+  "Results": [
+    {
+      "Target": "service/build.gradle.kts",
+      "Class": "lang-pkgs",
+      "Type": "gradle",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2021-44228",
+          "PkgName": "org.apache.logging.log4j:log4j-core",
+          "InstalledVersion": "2.14.1",
+          "FixedVersion": "2.15.0",
+          "Severity": "CRITICAL",
+          "Title": "log4j-core: remote code execution via JNDI lookup",
+          "CweIDs": ["CWE-502"]
+        }
+      ]
+    }
+  ]
+}

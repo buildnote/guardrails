@@ -1,0 +1,57 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      BUILDNOTE_API_KEY: ${{ secrets.BUILDNOTE_API_KEY }}
+      BUILDNOTE_GITHUB_JOB_NAME: test (${{ matrix.os }})
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5.0.1
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install Buildnote CLI
+        uses: buildnote/action@main
+        with:
+          installOnly: 'true'
+          version: 'dev'
+
+      - name: Run tests
+        run: python bin/run_tests.py
+
+      - name: Test summary
+        if: always()
+        run: buildnote report --source local
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: test-report-${{ matrix.os }}
+          path: build/report.html
+          if-no-files-found: warn
+
+      - name: Submit test results to Buildnote
+        if: always() && env.BUILDNOTE_API_KEY != ''
+        run: buildnote --verbose collect --timeout 30

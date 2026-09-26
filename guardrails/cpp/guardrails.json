@@ -1,0 +1,72 @@
+{
+  "version": "v1",
+  "category": "cpp",
+  "icon": "icon.svg",
+  "collect": [
+    "cpp"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "standard-declared": {
+      "name": "C++ standard is declared",
+      "description": "A CMake build that enables C++ declares the standard it compiles against, and that standard is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Set the standard the build compiles against in `CMakeLists.txt`:\n\n```cmake\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\n```\n\nThe guardrail only reads `CMAKE_CXX_STANDARD` in a `CMakeLists.txt`. A standard requested only through `target_compile_features` is not seen, and the build counts as declaring none. If the checkout is built with Meson or Bazel, the standard is declared somewhere the guardrail doesn't read, so the check skips instead of guessing.\n\nWhen no standard is declared, the compiler's default decides. The same commit then compiles as C++14 under one toolchain and C++17 under the next, and a feature that built on a laptop fails on the runner.",
+      "check": {
+        "run": "standard-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minStandard": {
+          "default": "17",
+          "description": "Oldest C++ standard accepted, written as the number CMake takes: `11`, `14`, `17`, `20` or `23`. A declared standard below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "standard-required": {
+      "name": "C++ standard is required, not preferred",
+      "description": "A CMake build that enables C++ requires the standard it declares, so a compiler that doesn't support it fails instead of falling back to an older one.",
+      "severity": "warning",
+      "remediation": "Make the standard a requirement, next to where it is declared:\n\n```cmake\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\n```\n\nWhen `CMAKE_CXX_STANDARD_REQUIRED` is off, CMake treats the standard as a preference. A compiler that doesn't support it silently drops to an older standard and configures without any warning. The build then compiles differently on a different machine, and the error shows up as a missing header instead of as a toolchain that is too old.",
+      "check": {
+        "run": "standard-required.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "package-manager-declared": {
+      "name": "Dependencies come from a package manager",
+      "description": "The checkout declares its dependencies through vcpkg or Conan, so it names the versions it builds against instead of taking whatever the machine has installed.",
+      "severity": "warning",
+      "remediation": "Declare your dependencies in a manifest the build resolves from, so `find_package` doesn't just pick up whatever is installed. For example, a `vcpkg.json` next to `CMakeLists.txt`:\n\n```json\n{\n  \"name\": \"widget\",\n  \"version\": \"1.2.3\",\n  \"builtin-baseline\": \"6f3a1c2d9b8e4f7a0c5d2e1b3a4f5c6d7e8f9a0b\",\n  \"dependencies\": [\"fmt\", { \"name\": \"spdlog\", \"version>=\": \"1.13.0\" }]\n}\n```\n\nor a `conanfile.txt` listing `fmt/10.2.1` under `[requires]`. Without a manifest, the build links against whatever system packages the machine happens to have. The same commit builds against a different `fmt` on a laptop, in CI and in the release image, and the difference shows up as a crash instead of as a resolution error.",
+      "check": {
+        "run": "package-manager-declared.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "cmake-minimum-floor": {
+      "name": "CMake floor is recent enough",
+      "description": "A CMake build names the CMake version whose policy defaults it uses, and that version is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Raise the minimum version on the first line of `CMakeLists.txt`:\n\n```cmake\ncmake_minimum_required(VERSION 3.25)\n```\n\nThis version selects CMake's policy defaults. An old one quietly keeps old behaviour for target properties, `find_package` search order and RPATH handling, so a build that looks modern is configured under rules from a decade ago. Current CMake refuses to configure anything below 3.5, and without a `cmake_minimum_required` the policies are whatever the installed CMake defaults to. With the range form `cmake_minimum_required(VERSION 3.10...3.28)`, the upper bound selects the policies, so that is the version compared with the floor.",
+      "check": {
+        "run": "cmake-minimum-floor.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "3.20",
+          "description": "Oldest CMake version accepted in `cmake_minimum_required`, compared against the policy version it selects. A version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

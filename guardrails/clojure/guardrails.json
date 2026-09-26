@@ -1,0 +1,72 @@
+{
+  "version": "v1",
+  "category": "clojure",
+  "icon": "icon.svg",
+  "collect": [
+    "clojure"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "version-declared": {
+      "name": "Clojure version is declared",
+      "description": "The project depends on the Clojure release it builds against, and that release is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Add a Clojure dependency where the project already declares its dependencies:\n\n```clojure\n{:deps {org.clojure/clojure {:mvn/version \"1.12.0\"}}}\n```\n\nLeiningen takes the same coordinates in `:dependencies`. If the project names no Clojure version, it compiles against whichever release the installed tool falls back to, so the language version a build uses depends on the runner, not on the commit.",
+      "check": {
+        "run": "version-declared.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minVersion": {
+          "default": "1.11",
+          "description": "Oldest Clojure version accepted. A declared version below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "dependencies-pinned": {
+      "name": "Clojure dependencies are pinned",
+      "description": "Every dependency in the manifests names a single released version, or the exact commit a git dependency builds from.",
+      "severity": "warning",
+      "remediation": "Name a specific release, and give every git coordinate the sha it resolves to:\n\n```clojure\n{:deps {cheshire/cheshire {:mvn/version \"5.13.0\"}\n        io.github.company/queue {:git/url \"https://github.com/company/queue\"\n                              :git/tag \"v1.4.0\"\n                              :git/sha \"6f3a1c2d9b8e4f7a0c5d2e1b3a4f5c6d7e8f9a0b\"}}}\n```\n\n`RELEASE`, `LATEST` and `-SNAPSHOT` resolve to whatever the repository serves at the moment the build runs, and a `:git/url` without a `:git/sha` resolves to wherever the branch has moved since. Either way, the artifact you ship is not the one that was reviewed.",
+      "check": {
+        "run": "dependencies-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "repositories-allowed": {
+      "name": "Repositories are ones the team allows",
+      "description": "Every Maven repository the manifest adds beyond the defaults resolves from a host on the allowed list.",
+      "severity": "error",
+      "remediation": "Resolve only from hosts your team has vetted, and give every repository entry the URL it resolves from:\n\n```clojure\n{:mvn/repos {\"clojars\" {:url \"https://repo.clojars.org/\"}}}\n```\n\nAdd an internal mirror to `allowedHosts` instead of leaving it unnamed. An unvetted repository is exactly what a dependency confusion attack needs: if someone publishes a package under your coordinates on a host the build can reach, the build resolves it as if it were yours. An entry with no `:url` tells you nothing about where its artifacts come from.",
+      "check": {
+        "run": "repositories-allowed.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "allowedHosts": {
+          "default": "repo1.maven.org,repo.clojars.org,clojars.org,central.sonatype.com",
+          "description": "Comma separated hosts a repository may resolve from. A repository on any other host is a violation."
+        }
+      },
+      "maxViolations": 0
+    },
+    "no-local-dependencies": {
+      "name": "No dependencies on a local root",
+      "description": "No dependency comes from a `:local/root`, so the build resolves everything from this commit and not from the machine it runs on.",
+      "severity": "warning",
+      "remediation": "Publish the library and depend on its published coordinates, or bring its source into the checkout:\n\n```clojure\n{:deps {company/queue {:mvn/version \"1.4.0\"}}}\n```\n\nA `:local/root` builds from a directory outside the checkout. The build works on the laptop that happens to have that directory next to it, and anywhere else it either fails or compiles different code.",
+      "check": {
+        "run": "no-local-dependencies.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    }
+  }
+}

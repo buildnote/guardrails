@@ -1,0 +1,66 @@
+{
+  "version": "v1",
+  "category": "dotnet",
+  "icon": "icon.svg",
+  "collect": [
+    "dotnet"
+  ],
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    }
+  },
+  "guardrails": {
+    "sdk-pinned": {
+      "name": ".NET SDK is pinned",
+      "description": "`global.json` names the SDK the build uses and holds it there, so a newer SDK on the runner can't take over.",
+      "severity": "warning",
+      "remediation": "Pin the SDK in a `global.json` at the root of the checkout, and stop it from rolling forward:\n\n```json\n{\n  \"sdk\": {\n    \"version\": \"8.0.204\",\n    \"rollForward\": \"disable\"\n  }\n}\n```\n\nAny `rollForward` policy other than `disable` lets a newer SDK on the runner take over the build, so `global.json` on its own is not a pin. Without the pin, MSBuild and compiler changes arrive with the runner image instead of with a commit someone reviewed.",
+      "check": {
+        "run": "sdk-pinned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "central-package-management": {
+      "name": "Package versions are managed centrally",
+      "description": "A single `Directory.Packages.props` sets the version of every package, instead of each project file setting its own.",
+      "severity": "warning",
+      "remediation": "Turn on central package management in a `Directory.Packages.props` next to the solution, and remove the `Version` attributes from the project files:\n\n```xml\n<Project>\n  <PropertyGroup>\n    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageVersion Include=\"Serilog\" Version=\"4.0.0\" />\n  </ItemGroup>\n</Project>\n```\n\nWhen every project file sets its own versions, two projects in the same solution can restore different versions of the same package, and an upgrade only lands in the project files someone remembered to edit.",
+      "check": {
+        "run": "central-package-management.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "dependencies-versioned": {
+      "name": "Package references carry a version",
+      "description": "Every `PackageReference` names its own version or takes one from a central `PackageVersion`.",
+      "severity": "error",
+      "remediation": "Give the reference a version, or add a central `PackageVersion` for it to take one from:\n\n```xml\n<PackageReference Include=\"Serilog\" Version=\"4.0.0\" />\n```\n\n```xml\n<PackageVersion Include=\"Serilog\" Version=\"4.0.0\" />\n```\n\nA `PackageReference` with no version of its own and no central one restores whatever NuGet picks, so the package the build compiles against is chosen at restore time, not in the commit.",
+      "check": {
+        "run": "dependencies-versioned.py",
+        "timeoutSeconds": 30
+      },
+      "maxViolations": 0
+    },
+    "target-framework-floor": {
+      "name": "Target framework is no older than the floor",
+      "description": "Every `net<major>.<minor>` framework a project targets is no older than the configured floor.",
+      "severity": "warning",
+      "remediation": "Retarget the project and rebuild it against the newer framework:\n\n```xml\n<TargetFramework>net8.0</TargetFramework>\n```\n\nA framework past the end of its support window stops receiving security fixes, so a build left on it keeps shipping a runtime nobody is patching. `netstandard2.0`, `net48` and `netcoreapp3.1` belong to a different versioning line, so they are skipped and never compared with the floor.",
+      "check": {
+        "run": "target-framework-floor.py",
+        "timeoutSeconds": 30
+      },
+      "inputs": {
+        "minFramework": {
+          "default": "net8.0",
+          "description": "Oldest `net<major>.<minor>` target framework accepted. A project targeting one below this is a violation."
+        }
+      },
+      "maxViolations": 0
+    }
+  }
+}

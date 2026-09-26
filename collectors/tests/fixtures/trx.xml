@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestDefinitions>
+    <UnitTest id="a" name="Widgets">
+      <TestMethod className="Company.WidgetTests" name="Widgets"/>
+    </UnitTest>
+  </TestDefinitions>
+  <Results>
+    <UnitTestResult testId="a" testName="Widgets" outcome="Failed" duration="00:00:00.1230000"/>
+  </Results>
+</TestRun>

@@ -1,0 +1,19 @@
+short:
+  timeout: 45m
+  script:
+    - make
+long:
+  timeout: 1h 30m
+  script:
+    - make
+seconds:
+  timeout: 3600
+  script:
+    - make
+odd:
+  timeout: a fortnight
+  script:
+    - make
+none:
+  script:
+    - make

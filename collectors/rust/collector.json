@@ -1,0 +1,49 @@
+{
+  "id": "rust",
+  "version": "v1",
+  "name": "Rust build",
+  "description": "The Cargo build in the project directory: the crate it declares, the Rust version and edition it asks for, every workspace member, the dependencies each manifest names with where each comes from and whether it is pinned, and the lock file beside them.",
+  "icon": "icon.svg",
+  "run": "rust.py",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "projectDir": {
+      "default": ".",
+      "description": "Directory holding the project, relative to the directory the CLI runs in."
+    },
+    "maxMembers": {
+      "default": "200",
+      "description": "Maximum number of workspace members to describe. A larger workspace carries the ones its globs resolve first."
+    }
+  },
+  "facts": {
+    "directory": "The project directory set by the guardrail's `projectDir` input, relative to the directory the CLI runs in. Every other path this collector reports is also relative to the directory the CLI runs in, so it resolves from where you invoked the CLI, not from wherever the collector happened to run.",
+    "exists": "Whether that directory exists. When it doesn't, nothing else is collected.",
+    "manifest": "Path of the primary manifest, from the directory the CLI runs in, always `Cargo.toml`.",
+    "sources": "Every manifest that was read and understood, in the order they were read. A manifest the reader could not handle is in `unparsed` instead.",
+    "declared": "The Rust version the build asks for, or `null` when it asks for none. `rust-toolchain.toml` wins over `rust-version`, because it is what `cargo` installs, while `rust-version` is only the minimum the crate compiles with. A `rust-version` under `[workspace.package]` is read as the whole workspace's, which is what a member inheriting it with `rust-version.workspace = true` compiles at.",
+    "declared.version": "Channel or version exactly as written, such as `1.76`, `stable` or `nightly-2026-03-01`.",
+    "declared.source": "File declaring it, from the directory the CLI runs in.",
+    "declared.pinned": "Whether it names one exact version rather than a moving channel. `stable`, `beta` and `nightly` are not pinned; `1.76.0` is.",
+    "edition": "The Rust edition the package declares, such as `2021`, or `null` when it declares none and 2015 is implied. Taken from the root `[package]`, then from `[workspace.package]` where the workspace declares one for its members to inherit, then from the first member declaring one of its own.",
+    "workspace": "Whether the manifest declares a `[workspace]`, so a guardrail can tell a single crate from the root of several.",
+    "projects": "Every crate in the build: the root package when it is one, followed by every workspace member.",
+    "projects[].path": "Directory of the crate, from the directory the CLI runs in; `directory` itself for the project directory.",
+    "projects[].manifest": "That crate's `Cargo.toml`, from the directory the CLI runs in.",
+    "projects[].name": "Name the `[package]` table declares, or `null` when it declares none.",
+    "dependencies": "What the manifests declare, split by whether the build asks for it itself.",
+    "dependencies.direct": "Every dependency any manifest declares, in manifest order.",
+    "dependencies.direct[].name": "Crate name as the manifest keys it. A renamed dependency is keyed by the name the code uses rather than the one it is published under.",
+    "dependencies.direct[].version": "Requirement exactly as written, such as `1.0.197` or `=1.0.197`, or `null` when the dependency comes from a path, a git URL or the workspace.",
+    "dependencies.direct[].scopes": "Which of `dependencies`, `dev-dependencies`, `build-dependencies` and `workspace` declare it.",
+    "dependencies.direct[].source": "Manifest declaring it, from the directory the CLI runs in.",
+    "dependencies.direct[].pinned": "Whether the requirement names one exact version. A bare `1.0` is Cargo's caret requirement and matches any compatible release, so only an `=` requirement is pinned.",
+    "dependencies.direct[].origin": "Where it comes from: `registry`, `path` for a crate in this checkout, `git` for one fetched from a URL, or `workspace` when the member inherits the root's.",
+    "dependencies.transitive": "Always empty. What `Cargo.lock` resolves is not read: `lockfiles` says whether one is committed.",
+    "lockfiles": "Every lock file committed, from the directory the CLI runs in. A library that commits one pins its own build without constraining anything that depends on it.",
+    "dropped": "Workspace members left out because `maxMembers` was reached. Above zero, `projects` and `dependencies` describe only part of the build.",
+    "unparsed": "Every manifest the reader could not handle, so a guardrail can tell a build that declares nothing apart from one that could not be read.",
+    "unparsed[].path": "Path of that manifest, from the directory the CLI runs in.",
+    "unparsed[].reason": "Why the reader could not handle it."
+  }
+}

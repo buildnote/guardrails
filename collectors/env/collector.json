@@ -1,0 +1,29 @@
+{
+  "id": "env",
+  "version": "v1",
+  "name": "CI environment",
+  "description": "Where the build is running: which CI provider, whether the runner is hosted or self hosted, what triggered it, and whether federated credentials are available to it.",
+  "icon": "icon.svg",
+  "run": "env.py",
+  "scope": "repository",
+  "timeoutSeconds": 30,
+  "inputs": {
+    "envFile": {
+      "default": "",
+      "description": "Read the environment from this `KEY=VALUE` file instead of the process environment. Meant for testing a guardrail against a runner you are not on."
+    }
+  },
+  "facts": {
+    "ci": "Whether the build is running on a CI runner at all, as opposed to a developer's workstation.",
+    "provider": "CI provider recognised from its own variables: `github`, `gitlab`, `jenkins`, `azure`, `circle`, `buildkite`, `teamcity`, `bitbucket`, `drone`, `travis`, or `local` when none is recognised.",
+    "hosted": "Whether the runner is the provider's own hosted fleet. `false` for a self hosted runner, `null` when the provider does not say.",
+    "trigger": "What started the build, as the provider names it, or `null`.",
+    "pullRequest": "Whether the build is for a pull or merge request.",
+    "fork": "Whether that request came from a fork, `null` when the provider does not say. A fork build is the one that must run without secrets.",
+    "runner.os": "Operating system the runner reports, or `null`.",
+    "runner.arch": "Architecture the runner reports, or `null`.",
+    "runner.name": "Name the runner reports, or `null`.",
+    "oidc": "Whether a federated identity token is available to this job, so a pipeline can reach a cloud without a long lived key.",
+    "variables": "Names of the CI variables that were set. Names only, never values: the facts are attached to the run event and a value can be a credential."
+  }
+}

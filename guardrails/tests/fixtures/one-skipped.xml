@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.company.widget.QueueTest" tests="2" failures="0" errors="0" skipped="1" time="0.300">
+  <testcase name="bounds the queue" classname="com.company.widget.QueueTest" time="0.201"/>
+  <testcase name="drops the oldest under load" classname="com.company.widget.QueueTest" time="0.088">
+    <skipped message="flaky on a shared runner"/>
+  </testcase>
+</testsuite>

@@ -1,0 +1,8 @@
+name: label
+on: pull_request_target
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@%s
+      - run: ./build.sh ${{ github.event.pull_request.head.ref }}
