@@ -400,3 +400,7 @@ declares, such as `git`, resolve normally.
 
 Assert the verdict, not just the violation count: a skip prints no violations either. `test_conventional_commits.py`
 is the worked example, covering the empty range and an unresolvable `baseRef` alongside the rules themselves.
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE). Contributions are accepted under the same license.
