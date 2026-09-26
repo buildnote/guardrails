@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version tag (e.g. 1.2.0)
+        required: true
+        type: string
+      summary:
+        description: Summary placed above the generated changes
+        required: false
+        type: string
+      latest:
+        description: Mark as the latest release
+        type: boolean
+        required: false
+        default: true
+      draft:
+        description: Create as a draft, edit the notes and publish from GitHub (the tag is created on publish)
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      SUMMARY: ${{ inputs.summary }}
+      LATEST: ${{ inputs.latest }}
+      DRAFT: ${{ inputs.draft }}
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check ref and version
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/$DEFAULT_BRANCH" ]; then
+            echo "::error::Release from $DEFAULT_BRANCH only, not $GITHUB_REF"
+            exit 1
+          fi
+          if ! [[ "$VERSION" =~ ^[A-Za-z0-9._-]+$ ]] || ! git check-ref-format "refs/tags/$VERSION"; then
+            echo "::error::'$VERSION' cannot be a tag a guardrail reference names"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag is new
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null; then
+            echo "::error::Tag $VERSION already exists and a tag is never moved"
+            exit 1
+          fi
+          if gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $VERSION already exists, delete the draft first"
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Run tests
+        run: python bin/run_tests.py
+
+      - name: Write release notes
+        run: |
+          previous=$(git describe --tags --abbrev=0 HEAD 2>/dev/null || true)
+          {
+            if [ -n "$SUMMARY" ]; then
+              printf '%s\n\n' "$SUMMARY"
+            fi
+            printf 'Reference a guardrail from this release as `<category>/<name>@%s`.\n\n' "$VERSION"
+            if [ -n "$previous" ]; then
+              printf '## Changes since %s\n\n' "$previous"
+              git log --no-merges --reverse --pretty='- %s (%h)' "$previous..HEAD"
+              printf '\n**Full changelog**: %s/%s/compare/%s...%s\n' \
+                "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$previous" "$VERSION"
+            else
+              printf '## Changes\n\n'
+              git log --no-merges --reverse --pretty='- %s (%h)' HEAD
+            fi
+          } > "$RUNNER_TEMP/release-notes.md"
+          cat "$RUNNER_TEMP/release-notes.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create GitHub release
+        run: |
+          flags=(--latest="$LATEST")
+          if [ "$DRAFT" = "true" ]; then
+            flags+=(--draft)
+          fi
+          gh release create "$VERSION" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            "${flags[@]}"

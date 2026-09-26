@@ -25,7 +25,7 @@ List it under `guardrails.checks` in `buildnote.json`:
 
 A `use` reference is `<category>/<name>@<version>`. Every guardrail in this repository is available without further
 configuration. To add guardrails of your own, list more libraries under `guardrails.sources`. They are searched in
-order, after the built-in ones:
+order, after this repository:
 
 ```json
 {
@@ -37,8 +37,8 @@ order, after the built-in ones:
 ```
 
 A `github://<owner>/<repository>` source is read over `raw.githubusercontent.com`, and the version in the reference
-is the git tag it is read at. A local path is a single version, so the reference's version must match the
-definition's own `version`. A `use` string can also carry a `github://<owner>/<repository>/` prefix, pinning that one
+is the git tag it is read at. A reference with no prefix is read from this repository on GitHub at its tag. A local
+path is a single version, so the reference's version is ignored there. A `use` string can also carry a `github://<owner>/<repository>/` prefix, pinning that one
 reference to that one repository.
 
 A reference no source declares is a configuration error, so a mistyped id never passes quietly. A source that cannot
@@ -50,8 +50,12 @@ Policies, reporting without gating and every other option are described in
 ## Versions
 
 A version is a git tag of this repository, and a tag is never moved. Moving one would change a script's SHA-256 and
-skip the guardrail for anyone pinning `sha256`. A breaking change, whether to a guardrail or to the layout of the
-repository, ships as a new tag, and old tags stay in place.
+skip the guardrail for anyone pinning `sha256`. Old tags stay in place, so a reference keeps resolving to the
+scripts it was written against. The `version` in a definition is informational: the tag decides what runs.
+
+A release is cut by running the `Release` workflow from the default branch with the new tag. It refuses a tag that
+already exists, runs the tests, and creates the tag together with a GitHub release whose notes list the commits
+since the previous tag. Releases live only on GitHub.
 
 ## Layout
 
@@ -169,8 +173,7 @@ two are merged.
 A collector is a directory holding `collector.json`, its script, an icon and a test. The definition carries an `id`, a
 `version`, a `name`, a `description`, an `icon`, the script to `run`, the `scope` it gathers over, a
 `timeoutSeconds`, its `inputs`, the collectors it `collect`s from itself, and the `facts` it prints. The `id` must
-match the directory name and the `version` the version being resolved, so a collector that moved or was bumped
-resolves to nothing rather than to the wrong script.
+match the directory name, so a collector that moved resolves to nothing rather than to the wrong script.
 
 `facts` is what a guardrail author reads instead of the script: one entry per key the collector prints, keyed by its
 path into the document (`head.sha`, `commits[].subject`, `files[path].present`), each saying what it means. `[]`
@@ -222,7 +225,7 @@ with `collector.collected("<name>")`. `kotlin` is the worked example: `gradle` a
 `kotlin` is the one place that knows what a Kotlin version looks like in either of them.
 
 A guardrail from another repository can use these collectors too. A collector is looked up in the guardrail's own
-source first, at the version that guardrail was asked for, and then among the built-in ones. So `"collect": ["git"]`
+source first, at the version that guardrail was asked for, and then in this repository. So `"collect": ["git"]`
 works in any guardrail, and a library that wants its own `git` collector ships one beside its guardrails. A `sha256`
 pin covers a check script only, not the collectors it asks for.
 
